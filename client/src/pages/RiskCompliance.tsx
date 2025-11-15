@@ -22,6 +22,7 @@ export default function RiskCompliance() {
   const allTransactions: RiskyTransaction[] = [
     {
       id: "tx-1",
+      numericId: 9821,
       token: "USDC",
       amount: 50000,
       from: "0xa1b2c3d4e5f6",
@@ -33,6 +34,7 @@ export default function RiskCompliance() {
     },
     {
       id: "tx-2",
+      numericId: 9822,
       token: "ETH",
       amount: 12.5,
       from: "0xabcdef123456",
@@ -44,6 +46,7 @@ export default function RiskCompliance() {
     },
     {
       id: "tx-3",
+      numericId: 9823,
       token: "BTC",
       amount: 0.85,
       from: "0x1234567890ab",
@@ -55,6 +58,7 @@ export default function RiskCompliance() {
     },
     {
       id: "tx-4",
+      numericId: 9824,
       token: "USDC",
       amount: 125000,
       from: "0x9988776655aa",
@@ -66,6 +70,7 @@ export default function RiskCompliance() {
     },
     {
       id: "tx-5",
+      numericId: 9825,
       token: "ETH",
       amount: 3.2,
       from: "0xffeeddccbbaa",

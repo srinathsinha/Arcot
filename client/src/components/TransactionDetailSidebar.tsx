@@ -1,36 +1,13 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Copy, CheckCircle2, Loader2, AlertTriangle, Send, ExternalLink, ChevronDown } from "lucide-react";
+import { Copy, CheckCircle2, Loader2, AlertTriangle, ChevronDown, Shield, MapPin, Clock, User, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import type { RiskyTransaction } from "./RiskyTransactionTable";
-
-interface Message {
-  id: string;
-  type: "user" | "agent";
-  content: string;
-  timestamp: string;
-}
-
-interface VerificationStep {
-  id: string;
-  status: "pending" | "completed" | "in-progress" | "alert";
-  title: string;
-  subtitle?: string;
-  timestamp: string;
-  payment?: number;
-  details?: string;
-  alertInfo?: {
-    riskScore: number;
-    connectedAddresses: number;
-    knownEntity: string;
-    recommendation: string;
-    chainalysisLink: string;
-  };
-}
 
 interface TransactionDetailSidebarProps {
   transaction: RiskyTransaction | null;
@@ -38,64 +15,73 @@ interface TransactionDetailSidebarProps {
   onClose: () => void;
 }
 
-const initialSteps: VerificationStep[] = [
-  {
-    id: "1",
-    status: "completed",
-    title: "Call Compliance Agent",
-    subtitle: "From: Locus Agent Marketplace",
-    timestamp: "2:34:12 PM",
-  },
-  {
-    id: "2",
-    status: "completed",
-    title: "Verify sender wallet",
-    payment: 0.002,
-    details: "Approved • 0xa1b2...3d4e",
-    timestamp: "2:34:15 PM",
-  },
-  {
-    id: "3",
-    status: "completed",
-    title: "Verify receiver wallet",
-    payment: 0.003,
-    details: "Approved • 0x9876...10ab",
-    timestamp: "2:34:18 PM",
-  },
-  {
-    id: "4",
-    status: "alert",
-    title: "Alert detected",
-    subtitle: "Linked to darknet market activity",
-    timestamp: "2:34:19 PM",
-    alertInfo: {
-      riskScore: 85,
-      connectedAddresses: 12,
-      knownEntity: "Silk Road 2.0 cluster",
-      recommendation: "Flag for manual review",
-      chainalysisLink: "#"
-    }
-  }
-];
+interface TimelineEvent {
+  type: string;
+  role?: string;
+  status: string;
+  ts: string;
+  invoice?: any;
+  amount_paid?: string;
+  asset?: string;
+  tx_hash?: string;
+  result?: any;
+  severity?: string;
+  debug?: any;
+  [key: string]: any;
+}
+
+interface ComplianceResponse {
+  txId: number;
+  header: {
+    token: string;
+    amount: number;
+    from: string;
+    to: string;
+    status: string;
+    risk_score: number;
+    risk_signals: string[];
+  };
+  timeline: TimelineEvent[];
+  totalComplianceSpend: string;
+  contract: {
+    name: string;
+    pricing: string;
+  };
+}
 
 export default function TransactionDetailSidebar({ 
   transaction, 
   open, 
   onClose 
 }: TransactionDetailSidebarProps) {
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [chatInput, setChatInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isTyping, setIsTyping] = useState(false);
-  const [alertExpanded, setAlertExpanded] = useState(false);
-  const [verificationSteps, setVerificationSteps] = useState<VerificationStep[]>(initialSteps);
+  const [expandedDebug, setExpandedDebug] = useState<Record<number, boolean>>({});
+  const [expandedAlerts, setExpandedAlerts] = useState<Record<number, boolean>>({});
+  const [complianceData, setComplianceData] = useState<ComplianceResponse | null>(null);
 
-  // Reset steps when transaction changes or sidebar opens
+  // Mutation to run compliance workflow via POST
+  const runComplianceMutation = useMutation({
+    mutationFn: async (tx: RiskyTransaction) => {
+      const response = await apiRequest('POST', `/api/transactions/${tx.numericId}/run-compliance`, {
+        amount: tx.amount,
+        token: tx.token,
+        from: tx.from,
+        to: tx.to,
+      });
+      const data = await response.json();
+      return data as ComplianceResponse;
+    },
+    onSuccess: (data) => {
+      setComplianceData(data);
+    },
+  });
+
   useEffect(() => {
     if (open && transaction) {
-      setVerificationSteps(initialSteps);
-      setAlertExpanded(false);
-      setMessages([]);
+      setExpandedDebug({});
+      setExpandedAlerts({});
+      setComplianceData(null); // Reset data when switching transactions
+      // Trigger compliance workflow for the selected transaction
+      runComplianceMutation.mutate(transaction);
     }
   }, [open, transaction]);
 
@@ -104,132 +90,9 @@ export default function TransactionDetailSidebar({
   };
 
   const handleReVerify = async () => {
-    setIsVerifying(true);
-    setAlertExpanded(false);
-
-    // Reset all steps to pending
-    const resetSteps = initialSteps.map(step => ({
-      ...step,
-      status: "pending" as const,
-      timestamp: ""
-    }));
-    setVerificationSteps(resetSteps);
-
-    // Execute steps sequentially with delays
-    for (let i = 0; i < initialSteps.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const now = new Date();
-      const timestamp = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-      
-      setVerificationSteps(prev => 
-        prev.map((step, idx) => {
-          if (idx === i) {
-            return {
-              ...step,
-              status: "in-progress" as const,
-              timestamp
-            };
-          }
-          return step;
-        })
-      );
-
-      // Complete the step after a brief delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      setVerificationSteps(prev => 
-        prev.map((step, idx) => {
-          if (idx === i) {
-            return {
-              ...initialSteps[i],
-              timestamp
-            };
-          }
-          return step;
-        })
-      );
-    }
-
-    setIsVerifying(false);
-    setAlertExpanded(true);
-  };
-
-  const handleSendMessage = async () => {
-    if (!chatInput.trim()) return;
-
-    const userMsg: Message = {
-      id: `msg-${Date.now()}`,
-      type: "user",
-      content: chatInput,
-      timestamp: new Date().toLocaleTimeString('en-US', { hour12: false })
-    };
-
-    setMessages(prev => [...prev, userMsg]);
-    setChatInput("");
-    setIsTyping(true);
-
-    // Add a new investigation step with $0.00 payment
-    const now = new Date();
-    const timestamp = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-    
-    const newStep: VerificationStep = {
-      id: `investigation-${Date.now()}`,
-      status: "in-progress",
-      title: "Additional Investigation",
-      subtitle: "Free follow-up included in contract",
-      timestamp,
-      payment: 0.00,
-      details: "Analyzing wallet history..."
-    };
-
-    setVerificationSteps(prev => [...prev, newStep]);
-
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const agentMsg: Message = {
-      id: `msg-${Date.now()}-agent`,
-      type: "agent",
-      content: "Analysis complete: This wallet has been flagged 3 times in the past 30 days for similar velocity patterns. Previous transactions totaling $45,000 were cleared after manual review.",
-      timestamp: new Date().toLocaleTimeString('en-US', { hour12: false })
-    };
-
-    setMessages(prev => [...prev, agentMsg]);
-    setIsTyping(false);
-
-    // Complete the investigation step
-    setVerificationSteps(prev => 
-      prev.map(step => 
-        step.id === newStep.id 
-          ? { ...step, status: "completed" as const, details: "Analysis complete" }
-          : step
-      )
-    );
-  };
-
-  const getStatusIcon = (status: VerificationStep["status"]) => {
-    switch (status) {
-      case "completed":
-        return <CheckCircle2 className="w-5 h-5 text-green-600" />;
-      case "in-progress":
-        return <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />;
-      case "alert":
-        return <AlertTriangle className="w-5 h-5 text-red-600" />;
-      case "pending":
-        return <div className="w-5 h-5 rounded-full border-2 border-muted" />;
-    }
-  };
-
-  const getStatusColor = (status: VerificationStep["status"]) => {
-    switch (status) {
-      case "completed":
-        return "border-green-600 bg-green-600";
-      case "in-progress":
-        return "border-blue-600 bg-blue-600";
-      case "alert":
-        return "border-red-600 bg-red-600";
-      case "pending":
-        return "border-muted bg-muted";
+    if (transaction) {
+      setComplianceData(null); // Reset before re-running
+      runComplianceMutation.mutate(transaction);
     }
   };
 
@@ -240,231 +103,358 @@ export default function TransactionDetailSidebar({
     return `${amount.toLocaleString()} ${token}`;
   };
 
+  const formatTimestamp = (ts: string) => {
+    try {
+      return new Date(ts).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: true 
+      });
+    } catch {
+      return ts;
+    }
+  };
+
+  const getAlertIcon = (type: string) => {
+    if (type.includes('darknet')) return AlertTriangle;
+    if (type.includes('sanctions')) return Shield;
+    if (type.includes('geographic')) return MapPin;
+    if (type.includes('velocity')) return Clock;
+    if (type.includes('new_entity')) return User;
+    return AlertTriangle;
+  };
+
+  const getAlertColor = (severity?: string) => {
+    switch (severity) {
+      case 'critical':
+        return 'border-red-600/50 bg-red-50 dark:bg-red-950/20';
+      case 'high':
+        return 'border-orange-600/50 bg-orange-50 dark:bg-orange-950/20';
+      case 'medium':
+        return 'border-yellow-600/50 bg-yellow-50 dark:bg-yellow-950/20';
+      default:
+        return 'border-red-600/50 bg-red-50 dark:bg-red-950/20';
+    }
+  };
+
+  const getEventTitle = (event: TimelineEvent) => {
+    switch (event.type) {
+      case 'call_compliance_agent':
+        return 'Call Compliance Agent';
+      case 'verify_sender':
+        return 'Verify Sender Wallet';
+      case 'verify_receiver':
+        return 'Verify Receiver Wallet';
+      case 'alert_darknet':
+        return 'Alert: Darknet Market Linkage';
+      case 'alert_sanctions':
+        return 'Alert: Sanctions List Match';
+      case 'alert_geographic':
+        return 'Alert: High-Risk Jurisdiction';
+      case 'alert_velocity':
+        return 'Alert: Unusual Transaction Pattern';
+      case 'alert_new_entity':
+        return 'Alert: New Entity Risk';
+      case 'qa_followup':
+        return 'Follow-up Q&A';
+      default:
+        return event.type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    }
+  };
+
+  const getEventSubtitle = (event: TimelineEvent) => {
+    if (event.type === 'call_compliance_agent') {
+      return 'From: Locus Agent Marketplace';
+    }
+    if (event.role) {
+      return `Role: ${event.role}`;
+    }
+    return undefined;
+  };
+
+  const getStatusIcon = (status: string) => {
+    if (status === 'completed') return <CheckCircle2 className="w-5 h-5 text-green-600" />;
+    if (status === 'in-progress') return <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />;
+    if (status === 'alert') return <AlertTriangle className="w-5 h-5 text-red-600" />;
+    return <div className="w-5 h-5 rounded-full border-2 border-muted" />;
+  };
+
+  const getStatusColor = (status: string) => {
+    if (status === 'completed') return 'border-green-600 bg-green-600';
+    if (status === 'in-progress') return 'border-blue-600 bg-blue-600';
+    if (status === 'alert') return 'border-red-600 bg-red-600';
+    return 'border-muted bg-muted';
+  };
+
   if (!transaction) return null;
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:w-[500px] sm:max-w-[500px] overflow-y-auto" data-testid="sidebar-transaction-detail">
+      <SheetContent className="w-full sm:w-[600px] sm:max-w-[600px] overflow-y-auto" data-testid="sidebar-transaction-detail">
         <SheetHeader>
           <SheetTitle className="text-sm" data-testid="text-transaction-title">
             Transaction Details
           </SheetTitle>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
-          {/* Compressed Header with Amount */}
-          <div className="flex items-center gap-2 text-sm border border-card-border rounded-lg p-3" data-testid="section-header">
-            <span className="font-semibold" data-testid="text-amount">
-              {formatAmount(transaction.amount, transaction.token)}
-            </span>
-            <span className="text-muted-foreground">•</span>
-            <span className="font-mono text-xs text-muted-foreground" data-testid="text-from">
-              {transaction.from.slice(0, 6)}...{transaction.from.slice(-4)}
-            </span>
-            <Button 
-              size="icon" 
-              variant="ghost" 
-              className="h-5 w-5"
-              onClick={() => handleCopy(transaction.from)}
-              data-testid="button-copy-from"
-            >
-              <Copy className="w-3 h-3" />
-            </Button>
-            <span className="text-muted-foreground">→</span>
-            <span className="font-mono text-xs text-muted-foreground" data-testid="text-to">
-              {transaction.to.slice(0, 6)}...{transaction.to.slice(-4)}
-            </span>
-            <Button 
-              size="icon" 
-              variant="ghost" 
-              className="h-5 w-5"
-              onClick={() => handleCopy(transaction.to)}
-              data-testid="button-copy-to"
-            >
-              <Copy className="w-3 h-3" />
-            </Button>
-            <Badge variant="destructive" className="ml-auto text-xs" data-testid="badge-risk">
-              {transaction.complianceResult}
-            </Badge>
+        {runComplianceMutation.isPending ? (
+          <div className="flex items-center justify-center py-12" data-testid="loading-compliance">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <span className="ml-3 text-muted-foreground">Running compliance workflow...</span>
           </div>
-
-          {/* Vertical Status Tracker */}
-          <div data-testid="section-verification">
-            <h3 className="text-sm font-semibold mb-4">Verification Timeline</h3>
-            <div className="relative">
-              {/* Vertical line */}
-              <div className="absolute left-[10px] top-2 bottom-2 w-[2px] bg-card-border" />
-              
-              <div className="space-y-4">
-                {verificationSteps.map((step, index) => (
-                  <div key={step.id} className="relative pl-8" data-testid={`step-${step.id}`}>
-                    {/* Status dot */}
-                    <div 
-                      className={`absolute left-0 w-5 h-5 rounded-full border-2 ${getStatusColor(step.status)} flex items-center justify-center`}
-                      style={{ top: '2px' }}
-                    >
-                      {step.status === "completed" && <div className="w-2 h-2 bg-white rounded-full" />}
-                    </div>
-
-                    {/* Step card */}
-                    <Card className={`p-3 ${step.status === "alert" ? "border-red-600/50" : ""}`}>
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(step.status)}
-                          <span className="font-medium text-sm">{step.title}</span>
-                        </div>
-                        {step.payment !== undefined && (
-                          <Badge variant="secondary" className="text-xs font-mono" data-testid={`payment-${step.id}`}>
-                            ${step.payment.toFixed(3)} USDC
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      {step.subtitle && (
-                        <p className="text-xs text-muted-foreground mb-1">{step.subtitle}</p>
-                      )}
-                      
-                      {step.details && (
-                        <p className="text-xs text-muted-foreground font-mono">{step.details}</p>
-                      )}
-                      
-                      {step.timestamp && (
-                        <p className="text-xs text-muted-foreground mt-1">{step.timestamp}</p>
-                      )}
-
-                      {/* Alert details */}
-                      {step.alertInfo && (
-                        <Collapsible open={alertExpanded} onOpenChange={setAlertExpanded} className="mt-2">
-                          <CollapsibleTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="w-full justify-between text-xs h-7"
-                              data-testid="button-expand-alert"
-                            >
-                              View Compliance Report
-                              <ChevronDown className={`w-3 h-3 transition-transform ${alertExpanded ? "rotate-180" : ""}`} />
-                            </Button>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent className="mt-2">
-                            <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-md p-3 space-y-2 text-xs" data-testid="alert-details">
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Risk Score:</span>
-                                <span className="font-semibold text-red-600">{step.alertInfo.riskScore}/100</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Connected Addresses:</span>
-                                <span className="font-semibold">{step.alertInfo.connectedAddresses}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Known Entity:</span>
-                                <span className="font-semibold">{step.alertInfo.knownEntity}</span>
-                              </div>
-                              <div className="pt-2 border-t border-red-200 dark:border-red-900">
-                                <p className="text-muted-foreground mb-2">Recommendation:</p>
-                                <p className="font-semibold">{step.alertInfo.recommendation}</p>
-                              </div>
-                              <a 
-                                href={step.alertInfo.chainalysisLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-primary hover:underline mt-2"
-                                data-testid="link-chainalysis"
-                              >
-                                View on Chainalysis
-                                <ExternalLink className="w-3 h-3" />
-                              </a>
-                            </div>
-                          </CollapsibleContent>
-                        </Collapsible>
-                      )}
-                    </Card>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Re-verify button */}
-          <div data-testid="section-actions">
-            <Button 
-              className="w-full gap-2" 
-              onClick={handleReVerify}
-              disabled={isVerifying}
-              variant="outline"
-              data-testid="button-reverify"
-            >
-              {isVerifying ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Verifying...
-                </>
-              ) : (
-                "Re-verify Transaction"
-              )}
-            </Button>
-          </div>
-
-          {/* Chat Interface */}
-          <div data-testid="section-chat">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold">Ask about this transaction</h3>
-              <Badge variant="secondary" className="text-xs">Free follow-up</Badge>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="space-y-2 max-h-60 overflow-y-auto" data-testid="chat-messages">
-                {messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}
-                    data-testid={`message-${msg.id}`}
+        ) : (
+          <div className="mt-6 space-y-6">
+            {/* Header */}
+            {complianceData && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm border border-card-border rounded-lg p-3" data-testid="section-header">
+                  <span className="font-semibold" data-testid="text-amount">
+                    {formatAmount(complianceData.header.amount, complianceData.header.token)}
+                  </span>
+                  <span className="text-muted-foreground">•</span>
+                  <span className="font-mono text-xs text-muted-foreground" data-testid="text-from">
+                    {complianceData.header.from.slice(0, 6)}...{complianceData.header.from.slice(-4)}
+                  </span>
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="h-5 w-5"
+                    onClick={() => handleCopy(complianceData.header.from)}
+                    data-testid="button-copy-from"
                   >
-                    <div
-                      className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                        msg.type === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
-                      }`}
-                    >
-                      <p className="text-sm">{msg.content}</p>
-                      <p className="text-xs opacity-70 mt-1">{msg.timestamp}</p>
-                    </div>
-                  </div>
-                ))}
-                {isTyping && (
-                  <div className="flex justify-start" data-testid="typing-indicator">
-                    <div className="bg-muted rounded-lg px-4 py-2">
-                      <div className="flex gap-1">
-                        <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                        <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                        <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                      </div>
-                    </div>
-                  </div>
-                )}
+                    <Copy className="w-3 h-3" />
+                  </Button>
+                  <span className="text-muted-foreground">→</span>
+                  <span className="text-xs text-muted-foreground">{complianceData.header.to}</span>
+                  <Badge variant="destructive" className="ml-auto text-xs" data-testid="badge-risk">
+                    {complianceData.header.status.replace('_', ' ').toUpperCase()}
+                  </Badge>
+                </div>
+
+                <div className="text-xs space-y-1 text-muted-foreground">
+                  <div>Risk Score: <span className="font-semibold text-red-600">{complianceData.header.risk_score}/100</span></div>
+                  <div>Signals: {complianceData.header.risk_signals.join(', ')}</div>
+                </div>
               </div>
-              
-              <div className="flex gap-2">
-                <Input
-                  placeholder="e.g., has this wallet seen suspicious activity?"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                  data-testid="input-chat"
-                />
+            )}
+
+            {/* Timeline */}
+            {complianceData && (
+              <div data-testid="section-verification">
+                <h3 className="text-sm font-semibold mb-4">Verification Timeline</h3>
+                <div className="relative">
+                  <div className="absolute left-[10px] top-2 bottom-2 w-[2px] bg-card-border" />
+                  
+                  <div className="space-y-4">
+                    {complianceData.timeline.map((event, index) => {
+                      const isAlert = event.type.startsWith('alert_');
+                      const Icon = isAlert ? getAlertIcon(event.type) : null;
+
+                      return (
+                        <div key={index} className="relative pl-8" data-testid={`step-${index}`}>
+                          <div 
+                            className={`absolute left-0 w-5 h-5 rounded-full border-2 ${getStatusColor(event.status)} flex items-center justify-center`}
+                            style={{ top: '2px' }}
+                          >
+                            {event.status === 'completed' && <div className="w-2 h-2 bg-white rounded-full" />}
+                          </div>
+
+                          <Card className={isAlert ? getAlertColor(event.severity) : ''}>
+                            <div className="p-3 space-y-2">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  {getStatusIcon(event.status)}
+                                  {Icon && <Icon className="w-4 h-4" />}
+                                  <span className="font-medium text-sm">{getEventTitle(event)}</span>
+                                </div>
+                                {event.amount_paid && (
+                                  <Badge variant="secondary" className="text-xs font-mono">
+                                    ${event.amount_paid} {event.asset}
+                                  </Badge>
+                                )}
+                                {event.price !== undefined && (
+                                  <Badge variant="secondary" className="text-xs font-mono">
+                                    ${event.price} USDC
+                                  </Badge>
+                                )}
+                              </div>
+
+                              {getEventSubtitle(event) && (
+                                <p className="text-xs text-muted-foreground">{getEventSubtitle(event)}</p>
+                              )}
+
+                              {event.tx_hash && (
+                                <div className="text-xs">
+                                  <span className="text-muted-foreground">Payment: </span>
+                                  <span className="font-semibold">Arcot Agent → Compliance Tool</span>
+                                  <div className="mt-1">
+                                    <a 
+                                      href={`https://sepolia.basescan.org/tx/${event.tx_hash}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-primary hover:underline text-xs font-mono flex items-center gap-1"
+                                    >
+                                      {event.tx_hash.slice(0, 10)}...{event.tx_hash.slice(-8)}
+                                      <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  </div>
+                                </div>
+                              )}
+
+                              {event.result && (
+                                <div className="text-xs">
+                                  <span className="text-muted-foreground">Verdict: </span>
+                                  <span className="font-semibold">{event.result.verdict}</span>
+                                </div>
+                              )}
+
+                              {event.ts && (
+                                <p className="text-xs text-muted-foreground">{formatTimestamp(event.ts)}</p>
+                              )}
+
+                              {/* Alert Details */}
+                              {isAlert && (
+                                <div className="mt-2 space-y-1 text-xs">
+                                  {event.cluster && (
+                                    <div><span className="text-muted-foreground">Cluster:</span> <span className="font-semibold">{event.cluster}</span></div>
+                                  )}
+                                  {event.connected_addresses !== undefined && (
+                                    <div><span className="text-muted-foreground">Connected Addresses:</span> <span className="font-semibold">{event.connected_addresses}</span></div>
+                                  )}
+                                  {event.jurisdiction && (
+                                    <div><span className="text-muted-foreground">Jurisdiction:</span> <span className="font-semibold">{event.jurisdiction}</span></div>
+                                  )}
+                                  {event.wallet_age_days !== undefined && (
+                                    <div><span className="text-muted-foreground">Wallet Age:</span> <span className="font-semibold">{event.wallet_age_days} days</span></div>
+                                  )}
+                                  {event.recommendation && (
+                                    <div className="mt-2 pt-2 border-t"><span className="text-muted-foreground">Recommendation:</span> <div className="font-semibold mt-1">{event.recommendation}</div></div>
+                                  )}
+                                  {event.intel_url && (
+                                    <a 
+                                      href={event.intel_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-1 text-primary hover:underline mt-2"
+                                    >
+                                      View Intelligence Report
+                                      <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Q&A */}
+                              {event.question && (
+                                <div className="mt-2 space-y-2 text-xs">
+                                  <div><span className="text-muted-foreground">Q:</span> <span className="italic">{event.question}</span></div>
+                                  <div><span className="text-muted-foreground">A:</span> <span>{event.answer}</span></div>
+                                </div>
+                              )}
+
+                              {/* API Details */}
+                              {event.debug && (
+                                <Collapsible 
+                                  open={expandedDebug[index]} 
+                                  onOpenChange={(open) => setExpandedDebug(prev => ({ ...prev, [index]: open }))}
+                                  className="mt-2"
+                                >
+                                  <CollapsibleTrigger asChild>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="w-full justify-between text-xs h-7"
+                                      data-testid={`button-expand-debug-${index}`}
+                                    >
+                                      View API Details
+                                      <ChevronDown className={`w-3 h-3 transition-transform ${expandedDebug[index] ? "rotate-180" : ""}`} />
+                                    </Button>
+                                  </CollapsibleTrigger>
+                                  <CollapsibleContent className="mt-2">
+                                    <div className="bg-muted/50 border rounded-md p-3 space-y-3 text-xs font-mono">
+                                      {event.debug.locus_first_call && (
+                                        <div>
+                                          <div className="font-semibold mb-1">1. Initial Request (402)</div>
+                                          <pre className="whitespace-pre-wrap overflow-x-auto">
+                                            {JSON.stringify(event.debug.locus_first_call, null, 2)}
+                                          </pre>
+                                        </div>
+                                      )}
+                                      {event.debug.cdp_payment && (
+                                        <div>
+                                          <div className="font-semibold mb-1">2. CDP Payment</div>
+                                          <pre className="whitespace-pre-wrap overflow-x-auto">
+                                            {JSON.stringify(event.debug.cdp_payment, null, 2)}
+                                          </pre>
+                                        </div>
+                                      )}
+                                      {event.debug.locus_second_call && (
+                                        <div>
+                                          <div className="font-semibold mb-1">3. Retry with X-PAYMENT (200)</div>
+                                          <pre className="whitespace-pre-wrap overflow-x-auto">
+                                            {JSON.stringify(event.debug.locus_second_call, null, 2)}
+                                          </pre>
+                                        </div>
+                                      )}
+                                      {event.debug.qa_call && (
+                                        <div>
+                                          <div className="font-semibold mb-1">Q&A Call</div>
+                                          <pre className="whitespace-pre-wrap overflow-x-auto">
+                                            {JSON.stringify(event.debug.qa_call, null, 2)}
+                                          </pre>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </CollapsibleContent>
+                                </Collapsible>
+                              )}
+                            </div>
+                          </Card>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Compliance Spend */}
+            {complianceData && (
+              <div className="pt-4 border-t space-y-2 text-xs" data-testid="section-spend">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total compliance spend:</span>
+                  <span className="font-semibold">${complianceData.totalComplianceSpend} USDC</span>
+                </div>
+                <div className="text-muted-foreground">
+                  Contract: {complianceData.contract.name} ({complianceData.contract.pricing})
+                </div>
+              </div>
+            )}
+
+            {/* Re-verify button */}
+            {complianceData && (
+              <div data-testid="section-actions">
                 <Button 
-                  size="icon"
-                  onClick={handleSendMessage}
-                  disabled={!chatInput.trim() || isTyping}
-                  data-testid="button-send"
+                  className="w-full gap-2" 
+                  onClick={handleReVerify}
+                  disabled={runComplianceMutation.isPending}
+                  variant="outline"
+                  data-testid="button-reverify"
                 >
-                  <Send className="w-4 h-4" />
+                  {runComplianceMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Verifying...
+                    </>
+                  ) : (
+                    "Re-run Compliance Check"
+                  )}
                 </Button>
               </div>
-            </div>
+            )}
           </div>
-        </div>
+        )}
       </SheetContent>
     </Sheet>
   );

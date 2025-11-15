@@ -5,6 +5,7 @@ import { AlertTriangle, Shield } from "lucide-react";
 
 export interface RiskyTransaction {
   id: string;
+  numericId: number;
   token: string;
   amount: number;
   from: string;
