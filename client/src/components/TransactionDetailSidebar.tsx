@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Copy, CheckCircle2, Loader2, AlertTriangle, ChevronDown, Shield, MapPin, Clock, User, ExternalLink } from "lucide-react";
+import { Copy, CheckCircle2, Loader2, AlertTriangle, ChevronDown, Shield, MapPin, Clock, User, ExternalLink, Check, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { RiskyTransaction } from "./RiskyTransactionTable";
 
@@ -54,6 +56,8 @@ export default function TransactionDetailSidebar({
   open, 
   onClose 
 }: TransactionDetailSidebarProps) {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [expandedDebug, setExpandedDebug] = useState<Record<number, boolean>>({});
   const [expandedAlerts, setExpandedAlerts] = useState<Record<number, boolean>>({});
   const [complianceData, setComplianceData] = useState<ComplianceResponse | null>(null);
@@ -98,6 +102,30 @@ export default function TransactionDetailSidebar({
     if (transaction) {
       setComplianceData(null); // Reset before re-running
       runComplianceMutation.mutate(transaction);
+    }
+  };
+
+  const handleApprove = () => {
+    if (transaction) {
+      toast({
+        title: "Transaction Approved",
+        description: `Transaction ${transaction.id} has been approved and forwarded to Treasury.`,
+      });
+      onClose();
+      setTimeout(() => {
+        setLocation("/treasury");
+      }, 500);
+    }
+  };
+
+  const handleReject = () => {
+    if (transaction) {
+      toast({
+        title: "Transaction Rejected",
+        description: `Transaction ${transaction.id} has been rejected and flagged for review.`,
+        variant: "destructive",
+      });
+      onClose();
     }
   };
 
@@ -437,9 +465,30 @@ export default function TransactionDetailSidebar({
               </div>
             )}
 
-            {/* Re-verify button */}
+            {/* Action buttons */}
             {complianceData && (
-              <div data-testid="section-actions">
+              <div data-testid="section-actions" className="space-y-3">
+                <div className="flex gap-3">
+                  <Button 
+                    className="flex-1 gap-2" 
+                    onClick={handleApprove}
+                    disabled={runComplianceMutation.isPending}
+                    data-testid="button-approve"
+                  >
+                    <Check className="w-4 h-4" />
+                    Approve & Forward to Treasury
+                  </Button>
+                  <Button 
+                    className="flex-1 gap-2" 
+                    onClick={handleReject}
+                    disabled={runComplianceMutation.isPending}
+                    variant="destructive"
+                    data-testid="button-reject"
+                  >
+                    <X className="w-4 h-4" />
+                    Reject Transaction
+                  </Button>
+                </div>
                 <Button 
                   className="w-full gap-2" 
                   onClick={handleReVerify}
