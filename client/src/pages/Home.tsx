@@ -45,7 +45,7 @@ export default function Home() {
             <h2 className="text-3xl font-bold mb-6 text-center" data-testid="text-problem-title">
               Problem
             </h2>
-            <p className="text-lg text-muted-foreground mb-8 text-center" data-testid="text-problem-description">
+            <p className="text-2xl text-foreground mb-8 text-center" data-testid="text-problem-description">
               Compliance/Treasury Ops isn't ready for onchain + agentic scale
             </p>
             <div className="grid md:grid-cols-3 gap-6">
@@ -53,14 +53,14 @@ export default function Home() {
                 <BarChart3 className="w-8 h-8 text-yellow-600 mb-3" />
                 <h3 className="text-base font-semibold mb-2">Scale</h3>
                 <p className="text-sm text-muted-foreground">
-                  Risk/Compliance systems need to scale from millions of daily txns in trad-fi to billions for agentic commerce systems
+                  Risk/Compliance systems need to scale from <span className="font-bold text-foreground">millions</span> of daily txns in trad-fi to <span className="font-bold text-foreground">billions</span> for agentic commerce systems
                 </p>
               </Card>
               <Card className="p-6" data-testid="card-problem-2">
                 <Zap className="w-8 h-8 text-yellow-600 mb-3" />
                 <h3 className="text-base font-semibold mb-2">Speed</h3>
                 <p className="text-sm text-muted-foreground">
-                  Transactions need to get validated proactively in seconds not reactively in weeks
+                  Transactions need to get validated proactively in <span className="font-bold text-foreground">seconds</span> not reactively in <span className="font-bold text-foreground">weeks</span>
                 </p>
               </Card>
               <Card className="p-6" data-testid="card-problem-3">
