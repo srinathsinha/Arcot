@@ -53,6 +53,13 @@ export default function RiskyTransactionTable({
     return "text-red-600 dark:text-red-500";
   };
 
+  const formatAmount = (amount: number, token: string) => {
+    if (token === "USDC" && amount >= 1000) {
+      return `$${amount.toLocaleString()}`;
+    }
+    return `${amount.toLocaleString()} ${token}`;
+  };
+
   return (
     <Card className="flex flex-col" data-testid="card-risky-transactions">
       <div className="p-4 border-b border-card-border">
@@ -76,12 +83,12 @@ export default function RiskyTransactionTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[15%]">Token</TableHead>
-                <TableHead className="w-[20%]">From</TableHead>
-                <TableHead className="w-[20%]">To</TableHead>
-                <TableHead className="w-[15%]">Time</TableHead>
-                <TableHead className="w-[20%]">Compliance</TableHead>
-                <TableHead className="w-[10%] text-right">Latency</TableHead>
+                <TableHead className="w-[15%]">Amount</TableHead>
+                <TableHead className="w-[18%]">From</TableHead>
+                <TableHead className="w-[18%]">To</TableHead>
+                <TableHead className="w-[12%]">Time</TableHead>
+                <TableHead className="w-[22%]">Compliance</TableHead>
+                <TableHead className="w-[15%] text-right">Latency</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -94,8 +101,8 @@ export default function RiskyTransactionTable({
                   }`}
                   data-testid={`row-transaction-${tx.id}`}
                 >
-                  <TableCell className="font-medium" data-testid={`cell-token-${tx.id}`}>
-                    {tx.token}
+                  <TableCell className="font-semibold" data-testid={`cell-amount-${tx.id}`}>
+                    {formatAmount(tx.amount, tx.token)}
                   </TableCell>
                   <TableCell className="font-mono text-xs" data-testid={`cell-from-${tx.id}`}>
                     {truncateAddress(tx.from)}
