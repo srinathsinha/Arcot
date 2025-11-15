@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shield, TrendingUp, ArrowRight, Activity, DollarSign, Network, Wallet, Gauge, Clock, Coins } from "lucide-react";
+import { Shield, TrendingUp, ArrowRight, Activity, DollarSign, Network, Wallet, BarChart3, Zap, Workflow } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Home() {
@@ -50,24 +50,24 @@ export default function Home() {
             </p>
             <div className="grid md:grid-cols-3 gap-6">
               <Card className="p-6" data-testid="card-problem-1">
-                <Gauge className="w-8 h-8 text-yellow-600 mb-3" />
+                <BarChart3 className="w-8 h-8 text-yellow-600 mb-3" />
                 <h3 className="text-base font-semibold mb-2">Scale</h3>
                 <p className="text-sm text-muted-foreground">
-                  Agentic commerce will process billions of transactions per day
+                  Risk/Compliance systems need to scale from millions of daily txns in trad-fi to billions for agentic commerce systems
                 </p>
               </Card>
               <Card className="p-6" data-testid="card-problem-2">
-                <Clock className="w-8 h-8 text-yellow-600 mb-3" />
+                <Zap className="w-8 h-8 text-yellow-600 mb-3" />
                 <h3 className="text-base font-semibold mb-2">Speed</h3>
                 <p className="text-sm text-muted-foreground">
-                  Review time needs to reduce from weeks to seconds
+                  Transactions need to get validated proactively in seconds not reactively in weeks
                 </p>
               </Card>
               <Card className="p-6" data-testid="card-problem-3">
-                <Coins className="w-8 h-8 text-yellow-600 mb-3" />
-                <h3 className="text-base font-semibold mb-2">Cost</h3>
+                <Workflow className="w-8 h-8 text-yellow-600 mb-3" />
+                <h3 className="text-base font-semibold mb-2">Flexibility</h3>
                 <p className="text-sm text-muted-foreground">
-                  Humans are too expensive
+                  Need to eliminate reliance on human workforce for sudden spikes in scale
                 </p>
               </Card>
             </div>
