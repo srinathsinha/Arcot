@@ -83,12 +83,12 @@ export default function RiskyTransactionTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[15%]">Amount</TableHead>
                 <TableHead className="w-[18%]">From</TableHead>
                 <TableHead className="w-[18%]">To</TableHead>
+                <TableHead className="w-[15%]">Amount</TableHead>
                 <TableHead className="w-[12%]">Time</TableHead>
-                <TableHead className="w-[22%]">Compliance</TableHead>
-                <TableHead className="w-[15%] text-right">Latency</TableHead>
+                <TableHead className="w-[22%]">Flag</TableHead>
+                <TableHead className="w-[15%] text-right">Processing Speed</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -101,14 +101,14 @@ export default function RiskyTransactionTable({
                   }`}
                   data-testid={`row-transaction-${tx.id}`}
                 >
-                  <TableCell className="font-semibold" data-testid={`cell-amount-${tx.id}`}>
-                    {formatAmount(tx.amount, tx.token)}
-                  </TableCell>
                   <TableCell className="font-mono text-xs" data-testid={`cell-from-${tx.id}`}>
                     {truncateAddress(tx.from)}
                   </TableCell>
                   <TableCell className="font-mono text-xs" data-testid={`cell-to-${tx.id}`}>
                     {truncateAddress(tx.to)}
+                  </TableCell>
+                  <TableCell className="font-semibold" data-testid={`cell-amount-${tx.id}`}>
+                    {formatAmount(tx.amount, tx.token)}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground" data-testid={`cell-time-${tx.id}`}>
                     {tx.timestamp}
