@@ -1,0 +1,61 @@
+You are a full-stack engineer. Create a small Node.js + Express project with both backend and frontend for the following:
+
+Goal:
+A single-page demo of an “Autonomous Risk & Compliance Officer” agent for a crypto-native bank.
+
+Requirements:
+1) Use Node.js + Express for the backend.
+2) Serve a static frontend from /public.
+3) Frontend should be a single HTML page with:
+   - Left: transaction stream (list of mock transactions; one is high-risk).
+   - Right: treasury pie chart using Chart.js.
+   - Bottom: agent console with typewriter-style logs and a single “Start Scenario” button.
+
+4) Backend should expose these endpoints (implement with simple dummy data first):
+   - POST /api/compliance/check
+       • Accepts tx details.
+       • Returns JSON with a simulated HTTP 402-style invoice:
+         { "status": 402, "challenge": { "price": "0.02 USDC", "receiver": "0xC0mpl1anceProvider", "network": "base", "payload_hash": "0xdeadbeef..." } }
+
+   - POST /api/compliance/pay
+       • Accepts a payment intent JSON.
+       • For now, just simulate success and return:
+         { "tx_hash": "0xSIMULATED_HASH", "explorer_url": "https://example.com/tx/0xSIMULATED_HASH" }
+
+       • I will later replace the internals of this route to call Coinbase CDP Server Wallets with a real API key.
+
+   - POST /api/compliance/verify
+       • Accepts payment info.
+       • Returns a simulated compliance verdict:
+         { "identity_verified": true, "device_risk": "low", "final_risk": "low" }
+
+   - POST /api/liquidity/quote
+       • Accepts { from_asset, to_asset, amount }.
+       • For now, just return a fixed quote:
+         { "from_asset": "USDC", "to_asset": "ETH", "amount_in": 3000, "amount_out": 0.9, "price": 3333.33, "slippage": 0.002 }
+
+       • I will later modify this to call a real price API.
+
+5) Frontend flow in app.js:
+   - When “Start Scenario” is clicked:
+       1. Highlight a hardcoded high-risk transaction row.
+       2. Call /api/compliance/check with that tx → display the 402 invoice in the console.
+       3. Construct a payment intent object in JS and log it.
+       4. Call /api/compliance/pay → show tx_hash and explorer_url in the console.
+       5. Call /api/compliance/verify → if identity_verified && final_risk == "low":
+            - mark the transaction row green.
+            - update an in-memory treasury state to add +8200 USDC.
+            - recompute percentages and log drift.
+       6. Call /api/liquidity/quote with { from_asset: "USDC", to_asset: "ETH", amount: 3000 }.
+            - Use the quote response to log a realistic “swap 3000 USDC → 0.9 ETH @ $3333”.
+            - Update the Chart.js pie chart from {ETH 42, USDC 45, BTC 13} to {ETH 50, USDC 40, BTC 10}.
+            - Log a simulated swap tx_hash.
+
+   - Agent console should show a sequence of messages representing the agent’s reasoning.
+
+6) Keep the code clean and organized:
+   - server.js for backend.
+   - /public/index.html, /public/styles.css, /public/app.js.
+   - Use CORS if needed for local fetch calls.
+
+Please scaffold the full project and explain briefly what you generated.
