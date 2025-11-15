@@ -12,7 +12,7 @@ export default function Home() {
             Arcot
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto" data-testid="text-hero-subtitle">
-            Multi-agent system for risk, compliance, and treasury management—built onchain
+            Multi-agent system for onchain risk, compliance, and treasury management
           </p>
         </div>
 
