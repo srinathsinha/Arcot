@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Copy, CheckCircle2, Loader2, ArrowRight, Send } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Copy, CheckCircle2, Loader2, AlertTriangle, Send, ExternalLink, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import type { RiskyTransaction } from "./RiskyTransactionTable";
 
@@ -12,6 +13,23 @@ interface Message {
   type: "user" | "agent";
   content: string;
   timestamp: string;
+}
+
+interface VerificationStep {
+  id: string;
+  status: "completed" | "in-progress" | "alert";
+  title: string;
+  subtitle?: string;
+  timestamp: string;
+  payment?: number;
+  details?: string;
+  alertInfo?: {
+    riskScore: number;
+    connectedAddresses: number;
+    knownEntity: string;
+    recommendation: string;
+    chainalysisLink: string;
+  };
 }
 
 interface TransactionDetailSidebarProps {
@@ -29,6 +47,47 @@ export default function TransactionDetailSidebar({
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [alertExpanded, setAlertExpanded] = useState(false);
+
+  const verificationSteps: VerificationStep[] = [
+    {
+      id: "1",
+      status: "completed",
+      title: "Call Compliance Agent",
+      subtitle: "From: Locus Agent Marketplace",
+      timestamp: "2:34:12 PM",
+    },
+    {
+      id: "2",
+      status: "completed",
+      title: "Verify sender wallet",
+      payment: 0.002,
+      details: "Approved • 0xa1b2...3d4e",
+      timestamp: "2:34:15 PM",
+    },
+    {
+      id: "3",
+      status: "completed",
+      title: "Verify receiver wallet",
+      payment: 0.003,
+      details: "Approved • 0x9876...10ab",
+      timestamp: "2:34:18 PM",
+    },
+    {
+      id: "4",
+      status: "alert",
+      title: "Alert detected",
+      subtitle: "Linked to darknet market activity",
+      timestamp: "2:34:19 PM",
+      alertInfo: {
+        riskScore: 85,
+        connectedAddresses: 12,
+        knownEntity: "Silk Road 2.0 cluster",
+        recommendation: "Flag for manual review",
+        chainalysisLink: "#"
+      }
+    }
+  ];
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -67,117 +126,175 @@ export default function TransactionDetailSidebar({
     setIsTyping(false);
   };
 
+  const getStatusIcon = (status: VerificationStep["status"]) => {
+    switch (status) {
+      case "completed":
+        return <CheckCircle2 className="w-5 h-5 text-green-600" />;
+      case "in-progress":
+        return <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />;
+      case "alert":
+        return <AlertTriangle className="w-5 h-5 text-red-600" />;
+    }
+  };
+
+  const getStatusColor = (status: VerificationStep["status"]) => {
+    switch (status) {
+      case "completed":
+        return "border-green-600 bg-green-600";
+      case "in-progress":
+        return "border-blue-600 bg-blue-600";
+      case "alert":
+        return "border-red-600 bg-red-600";
+    }
+  };
+
   if (!transaction) return null;
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent className="w-full sm:w-[500px] sm:max-w-[500px] overflow-y-auto" data-testid="sidebar-transaction-detail">
         <SheetHeader>
-          <SheetTitle className="font-mono text-sm" data-testid="text-transaction-hash">
+          <SheetTitle className="text-sm" data-testid="text-transaction-title">
             Transaction Details
           </SheetTitle>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
-          <Card className="p-4" data-testid="card-overview">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Token</span>
-                <span className="font-semibold" data-testid="text-token">{transaction.token}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">From</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs" data-testid="text-from">{transaction.from}</span>
-                  <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="h-6 w-6"
-                    onClick={() => handleCopy(transaction.from)}
-                    data-testid="button-copy-from"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </Button>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">To</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs" data-testid="text-to">{transaction.to}</span>
-                  <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="h-6 w-6"
-                    onClick={() => handleCopy(transaction.to)}
-                    data-testid="button-copy-to"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </Button>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Status</span>
-                <Badge variant="destructive" data-testid="badge-risk">
-                  {transaction.complianceResult}
-                </Badge>
-              </div>
-            </div>
-          </Card>
-
-          <div data-testid="section-flow">
-            <h3 className="text-sm font-semibold mb-3">Verification Flow</h3>
-            <Card className="p-4 bg-muted/30">
-              <div className="flex items-center gap-2 text-xs">
-                <div className="flex flex-col items-center gap-1" data-testid="flow-step-agent">
-                  <div className="w-10 h-10 rounded-md bg-primary/10 border-2 border-primary flex items-center justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-primary" />
-                  </div>
-                  <span className="text-center">Agent</span>
-                </div>
-                
-                <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                
-                <div className="flex flex-col items-center gap-1" data-testid="flow-step-payment">
-                  <div className="w-10 h-10 rounded-md bg-green-500/10 border-2 border-green-500 flex items-center justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-green-600" />
-                  </div>
-                  <span className="text-center">x402</span>
-                </div>
-                
-                <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                
-                <div className="flex flex-col items-center gap-1" data-testid="flow-step-coinbase">
-                  <div className="w-10 h-10 rounded-md bg-green-500/10 border-2 border-green-500 flex items-center justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-green-600" />
-                  </div>
-                  <span className="text-center">Wallet</span>
-                </div>
-                
-                <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                
-                <div className="flex flex-col items-center gap-1" data-testid="flow-step-result">
-                  <div className="w-10 h-10 rounded-md bg-green-500/10 border-2 border-green-500 flex items-center justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-green-600" />
-                  </div>
-                  <span className="text-center">Result</span>
-                </div>
-              </div>
-              
-              <div className="mt-4 p-2 bg-card rounded border border-card-border" data-testid="payment-info">
-                <div className="text-xs">
-                  <span className="text-muted-foreground">Payment: </span>
-                  <span className="font-semibold text-green-600">0.02 USDC</span>
-                  <span className="text-muted-foreground ml-2">→ Compliance Provider</span>
-                </div>
-              </div>
-            </Card>
+          {/* Compressed Header */}
+          <div className="flex items-center gap-2 text-sm border border-card-border rounded-lg p-3" data-testid="section-header">
+            <span className="font-semibold" data-testid="text-token">{transaction.token}</span>
+            <span className="font-mono text-xs text-muted-foreground" data-testid="text-from">
+              {transaction.from.slice(0, 6)}...{transaction.from.slice(-4)}
+            </span>
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="h-5 w-5"
+              onClick={() => handleCopy(transaction.from)}
+              data-testid="button-copy-from"
+            >
+              <Copy className="w-3 h-3" />
+            </Button>
+            <span className="text-muted-foreground">→</span>
+            <span className="font-mono text-xs text-muted-foreground" data-testid="text-to">
+              {transaction.to.slice(0, 6)}...{transaction.to.slice(-4)}
+            </span>
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="h-5 w-5"
+              onClick={() => handleCopy(transaction.to)}
+              data-testid="button-copy-to"
+            >
+              <Copy className="w-3 h-3" />
+            </Button>
+            <Badge variant="destructive" className="ml-auto text-xs" data-testid="badge-risk">
+              {transaction.complianceResult}
+            </Badge>
           </div>
 
+          {/* Vertical Status Tracker */}
+          <div data-testid="section-verification">
+            <h3 className="text-sm font-semibold mb-4">Verification Timeline</h3>
+            <div className="relative">
+              {/* Vertical line */}
+              <div className="absolute left-[10px] top-2 bottom-2 w-[2px] bg-card-border" />
+              
+              <div className="space-y-4">
+                {verificationSteps.map((step, index) => (
+                  <div key={step.id} className="relative pl-8" data-testid={`step-${step.id}`}>
+                    {/* Status dot */}
+                    <div 
+                      className={`absolute left-0 w-5 h-5 rounded-full border-2 ${getStatusColor(step.status)} flex items-center justify-center`}
+                      style={{ top: '2px' }}
+                    >
+                      {step.status === "completed" && <div className="w-2 h-2 bg-white rounded-full" />}
+                    </div>
+
+                    {/* Step card */}
+                    <Card className={`p-3 ${step.status === "alert" ? "border-red-600/50" : ""}`}>
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(step.status)}
+                          <span className="font-medium text-sm">{step.title}</span>
+                        </div>
+                        {step.payment !== undefined && (
+                          <Badge variant="secondary" className="text-xs font-mono" data-testid={`payment-${step.id}`}>
+                            ${step.payment.toFixed(3)} USDC
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {step.subtitle && (
+                        <p className="text-xs text-muted-foreground mb-1">{step.subtitle}</p>
+                      )}
+                      
+                      {step.details && (
+                        <p className="text-xs text-muted-foreground font-mono">{step.details}</p>
+                      )}
+                      
+                      <p className="text-xs text-muted-foreground mt-1">{step.timestamp}</p>
+
+                      {/* Alert details */}
+                      {step.alertInfo && (
+                        <Collapsible open={alertExpanded} onOpenChange={setAlertExpanded} className="mt-2">
+                          <CollapsibleTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="w-full justify-between text-xs h-7"
+                              data-testid="button-expand-alert"
+                            >
+                              View Compliance Report
+                              <ChevronDown className={`w-3 h-3 transition-transform ${alertExpanded ? "rotate-180" : ""}`} />
+                            </Button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="mt-2">
+                            <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-md p-3 space-y-2 text-xs" data-testid="alert-details">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Risk Score:</span>
+                                <span className="font-semibold text-red-600">{step.alertInfo.riskScore}/100</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Connected Addresses:</span>
+                                <span className="font-semibold">{step.alertInfo.connectedAddresses}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Known Entity:</span>
+                                <span className="font-semibold">{step.alertInfo.knownEntity}</span>
+                              </div>
+                              <div className="pt-2 border-t border-red-200 dark:border-red-900">
+                                <p className="text-muted-foreground mb-2">Recommendation:</p>
+                                <p className="font-semibold">{step.alertInfo.recommendation}</p>
+                              </div>
+                              <a 
+                                href={step.alertInfo.chainalysisLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-primary hover:underline mt-2"
+                                data-testid="link-chainalysis"
+                              >
+                                View on Chainalysis
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      )}
+                    </Card>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Re-verify button */}
           <div data-testid="section-actions">
             <Button 
               className="w-full gap-2" 
               onClick={handleReVerify}
               disabled={isVerifying}
+              variant="outline"
               data-testid="button-reverify"
             >
               {isVerifying ? (
@@ -191,8 +308,13 @@ export default function TransactionDetailSidebar({
             </Button>
           </div>
 
+          {/* Chat Interface */}
           <div data-testid="section-chat">
-            <h3 className="text-sm font-semibold mb-3">Ask about this transaction</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold">Ask about this transaction</h3>
+              <Badge variant="secondary" className="text-xs">Free follow-up</Badge>
+            </div>
+            
             <div className="space-y-3">
               <div className="space-y-2 max-h-60 overflow-y-auto" data-testid="chat-messages">
                 {messages.map((msg) => (
