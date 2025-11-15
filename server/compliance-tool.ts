@@ -42,6 +42,13 @@ class ComplianceToolSimulator {
     return `${txId}:${role}`;
   }
 
+  resetState(txId: string): void {
+    const senderKey = this.getKey(txId, "sender");
+    const receiverKey = this.getKey(txId, "receiver");
+    this.state.delete(senderKey);
+    this.state.delete(receiverKey);
+  }
+
   async handleCheck(txId: string, role: "sender" | "receiver", xPayment?: string): Promise<{
     status: number;
     body: any;

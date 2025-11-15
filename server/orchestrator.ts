@@ -39,6 +39,9 @@ export async function runCompliance(
   txId: number, 
   txInput: TransactionInput
 ): Promise<OrchestratorResponse> {
+  // Reset compliance tool state for fresh run
+  complianceTool.resetState(txId.toString());
+  
   const timeline: TimelineEvent[] = [];
   const agentAddress = await cdpWallet.getAgentAddress();
   const complianceAddress = await cdpWallet.getComplianceAddress();

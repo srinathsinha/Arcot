@@ -73,6 +73,10 @@ export default function TransactionDetailSidebar({
     onSuccess: (data) => {
       setComplianceData(data);
     },
+    onError: (error) => {
+      console.error('Compliance workflow error:', error);
+      // Keep the sidebar open but show error state
+    },
   });
 
   useEffect(() => {
@@ -83,7 +87,8 @@ export default function TransactionDetailSidebar({
       // Trigger compliance workflow for the selected transaction
       runComplianceMutation.mutate(transaction);
     }
-  }, [open, transaction]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, transaction?.id]);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
