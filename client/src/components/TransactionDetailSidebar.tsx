@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Copy, CheckCircle2, Loader2, AlertTriangle, Send, ExternalLink, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { RiskyTransaction } from "./RiskyTransactionTable";
 
 interface Message {
@@ -17,7 +17,7 @@ interface Message {
 
 interface VerificationStep {
   id: string;
-  status: "completed" | "in-progress" | "alert";
+  status: "pending" | "completed" | "in-progress" | "alert";
   title: string;
   subtitle?: string;
   timestamp: string;
@@ -38,6 +38,46 @@ interface TransactionDetailSidebarProps {
   onClose: () => void;
 }
 
+const initialSteps: VerificationStep[] = [
+  {
+    id: "1",
+    status: "completed",
+    title: "Call Compliance Agent",
+    subtitle: "From: Locus Agent Marketplace",
+    timestamp: "2:34:12 PM",
+  },
+  {
+    id: "2",
+    status: "completed",
+    title: "Verify sender wallet",
+    payment: 0.002,
+    details: "Approved • 0xa1b2...3d4e",
+    timestamp: "2:34:15 PM",
+  },
+  {
+    id: "3",
+    status: "completed",
+    title: "Verify receiver wallet",
+    payment: 0.003,
+    details: "Approved • 0x9876...10ab",
+    timestamp: "2:34:18 PM",
+  },
+  {
+    id: "4",
+    status: "alert",
+    title: "Alert detected",
+    subtitle: "Linked to darknet market activity",
+    timestamp: "2:34:19 PM",
+    alertInfo: {
+      riskScore: 85,
+      connectedAddresses: 12,
+      knownEntity: "Silk Road 2.0 cluster",
+      recommendation: "Flag for manual review",
+      chainalysisLink: "#"
+    }
+  }
+];
+
 export default function TransactionDetailSidebar({ 
   transaction, 
   open, 
@@ -48,46 +88,16 @@ export default function TransactionDetailSidebar({
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [alertExpanded, setAlertExpanded] = useState(false);
+  const [verificationSteps, setVerificationSteps] = useState<VerificationStep[]>(initialSteps);
 
-  const verificationSteps: VerificationStep[] = [
-    {
-      id: "1",
-      status: "completed",
-      title: "Call Compliance Agent",
-      subtitle: "From: Locus Agent Marketplace",
-      timestamp: "2:34:12 PM",
-    },
-    {
-      id: "2",
-      status: "completed",
-      title: "Verify sender wallet",
-      payment: 0.002,
-      details: "Approved • 0xa1b2...3d4e",
-      timestamp: "2:34:15 PM",
-    },
-    {
-      id: "3",
-      status: "completed",
-      title: "Verify receiver wallet",
-      payment: 0.003,
-      details: "Approved • 0x9876...10ab",
-      timestamp: "2:34:18 PM",
-    },
-    {
-      id: "4",
-      status: "alert",
-      title: "Alert detected",
-      subtitle: "Linked to darknet market activity",
-      timestamp: "2:34:19 PM",
-      alertInfo: {
-        riskScore: 85,
-        connectedAddresses: 12,
-        knownEntity: "Silk Road 2.0 cluster",
-        recommendation: "Flag for manual review",
-        chainalysisLink: "#"
-      }
+  // Reset steps when transaction changes or sidebar opens
+  useEffect(() => {
+    if (open && transaction) {
+      setVerificationSteps(initialSteps);
+      setAlertExpanded(false);
+      setMessages([]);
     }
-  ];
+  }, [open, transaction]);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -95,8 +105,54 @@ export default function TransactionDetailSidebar({
 
   const handleReVerify = async () => {
     setIsVerifying(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    setAlertExpanded(false);
+
+    // Reset all steps to pending
+    const resetSteps = initialSteps.map(step => ({
+      ...step,
+      status: "pending" as const,
+      timestamp: ""
+    }));
+    setVerificationSteps(resetSteps);
+
+    // Execute steps sequentially with delays
+    for (let i = 0; i < initialSteps.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const now = new Date();
+      const timestamp = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+      
+      setVerificationSteps(prev => 
+        prev.map((step, idx) => {
+          if (idx === i) {
+            return {
+              ...step,
+              status: "in-progress" as const,
+              timestamp
+            };
+          }
+          return step;
+        })
+      );
+
+      // Complete the step after a brief delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setVerificationSteps(prev => 
+        prev.map((step, idx) => {
+          if (idx === i) {
+            return {
+              ...initialSteps[i],
+              timestamp
+            };
+          }
+          return step;
+        })
+      );
+    }
+
     setIsVerifying(false);
+    setAlertExpanded(true);
   };
 
   const handleSendMessage = async () => {
@@ -113,6 +169,22 @@ export default function TransactionDetailSidebar({
     setChatInput("");
     setIsTyping(true);
 
+    // Add a new investigation step with $0.00 payment
+    const now = new Date();
+    const timestamp = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    
+    const newStep: VerificationStep = {
+      id: `investigation-${Date.now()}`,
+      status: "in-progress",
+      title: "Additional Investigation",
+      subtitle: "Free follow-up included in contract",
+      timestamp,
+      payment: 0.00,
+      details: "Analyzing wallet history..."
+    };
+
+    setVerificationSteps(prev => [...prev, newStep]);
+
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     const agentMsg: Message = {
@@ -124,6 +196,15 @@ export default function TransactionDetailSidebar({
 
     setMessages(prev => [...prev, agentMsg]);
     setIsTyping(false);
+
+    // Complete the investigation step
+    setVerificationSteps(prev => 
+      prev.map(step => 
+        step.id === newStep.id 
+          ? { ...step, status: "completed" as const, details: "Analysis complete" }
+          : step
+      )
+    );
   };
 
   const getStatusIcon = (status: VerificationStep["status"]) => {
@@ -134,6 +215,8 @@ export default function TransactionDetailSidebar({
         return <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />;
       case "alert":
         return <AlertTriangle className="w-5 h-5 text-red-600" />;
+      case "pending":
+        return <div className="w-5 h-5 rounded-full border-2 border-muted" />;
     }
   };
 
@@ -145,7 +228,16 @@ export default function TransactionDetailSidebar({
         return "border-blue-600 bg-blue-600";
       case "alert":
         return "border-red-600 bg-red-600";
+      case "pending":
+        return "border-muted bg-muted";
     }
+  };
+
+  const formatAmount = (amount: number, token: string) => {
+    if (token === "USDC" && amount >= 1000) {
+      return `$${amount.toLocaleString()}`;
+    }
+    return `${amount.toLocaleString()} ${token}`;
   };
 
   if (!transaction) return null;
@@ -160,9 +252,12 @@ export default function TransactionDetailSidebar({
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
-          {/* Compressed Header */}
+          {/* Compressed Header with Amount */}
           <div className="flex items-center gap-2 text-sm border border-card-border rounded-lg p-3" data-testid="section-header">
-            <span className="font-semibold" data-testid="text-token">{transaction.token}</span>
+            <span className="font-semibold" data-testid="text-amount">
+              {formatAmount(transaction.amount, transaction.token)}
+            </span>
+            <span className="text-muted-foreground">•</span>
             <span className="font-mono text-xs text-muted-foreground" data-testid="text-from">
               {transaction.from.slice(0, 6)}...{transaction.from.slice(-4)}
             </span>
@@ -233,7 +328,9 @@ export default function TransactionDetailSidebar({
                         <p className="text-xs text-muted-foreground font-mono">{step.details}</p>
                       )}
                       
-                      <p className="text-xs text-muted-foreground mt-1">{step.timestamp}</p>
+                      {step.timestamp && (
+                        <p className="text-xs text-muted-foreground mt-1">{step.timestamp}</p>
+                      )}
 
                       {/* Alert details */}
                       {step.alertInfo && (

@@ -23,6 +23,7 @@ export default function RiskCompliance() {
     {
       id: "tx-1",
       token: "USDC",
+      amount: 50000,
       from: "0xa1b2c3d4e5f6",
       to: "0x9876543210ab",
       timestamp: "2m ago",
@@ -33,6 +34,7 @@ export default function RiskCompliance() {
     {
       id: "tx-2",
       token: "ETH",
+      amount: 12.5,
       from: "0xabcdef123456",
       to: "0x654321fedcba",
       timestamp: "5m ago",
@@ -43,6 +45,7 @@ export default function RiskCompliance() {
     {
       id: "tx-3",
       token: "BTC",
+      amount: 0.85,
       from: "0x1234567890ab",
       to: "0xabcdef012345",
       timestamp: "8m ago",
@@ -53,6 +56,7 @@ export default function RiskCompliance() {
     {
       id: "tx-4",
       token: "USDC",
+      amount: 125000,
       from: "0x9988776655aa",
       to: "0xbbccddee1122",
       timestamp: "12m ago",
@@ -63,6 +67,7 @@ export default function RiskCompliance() {
     {
       id: "tx-5",
       token: "ETH",
+      amount: 3.2,
       from: "0xffeeddccbbaa",
       to: "0x112233445566",
       timestamp: "15m ago",
