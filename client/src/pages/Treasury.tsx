@@ -1,3 +1,6 @@
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import PortfolioView, { type EntityPortfolio } from "@/components/PortfolioView";
 import PortfolioMetrics, { type Metrics } from "@/components/PortfolioMetrics";
 import RebalancingFeed, { type RebalanceOperation } from "@/components/RebalancingFeed";
@@ -76,10 +79,29 @@ export default function Treasury() {
   ];
 
   return (
-    <div className="space-y-6" data-testid="page-treasury">
-      <PortfolioMetrics metrics={metrics} />
-      <PortfolioView portfolios={portfolios} />
-      <RebalancingFeed operations={operations} />
+    <div className="min-h-screen bg-background" data-testid="page-treasury">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="mb-6">
+          <Link href="/">
+            <Button variant="ghost" className="gap-2 mb-4" data-testid="button-back">
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Button>
+          </Link>
+          <h1 className="text-xl font-semibold mb-1" data-testid="text-page-title">
+            Treasury Management
+          </h1>
+          <p className="text-sm text-muted-foreground" data-testid="text-page-subtitle">
+            Automated portfolio rebalancing and drift tracking
+          </p>
+        </div>
+
+        <div className="space-y-6">
+          <PortfolioMetrics metrics={metrics} />
+          <PortfolioView portfolios={portfolios} />
+          <RebalancingFeed operations={operations} />
+        </div>
+      </div>
     </div>
   );
 }

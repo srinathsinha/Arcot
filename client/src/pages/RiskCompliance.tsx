@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import GlobalMap, { type MapHotspot } from "@/components/GlobalMap";
 import RiskyTransactionTable, { type RiskyTransaction } from "@/components/RiskyTransactionTable";
 import TransactionDetailSidebar from "@/components/TransactionDetailSidebar";
@@ -79,20 +82,39 @@ export default function RiskCompliance() {
   };
 
   return (
-    <div className="space-y-6" data-testid="page-risk-compliance">
-      <GlobalMap hotspots={hotspots} onMarkerClick={handleMarkerClick} />
-      
-      <RiskyTransactionTable
-        transactions={allTransactions}
-        onTransactionClick={handleTransactionClick}
-        selectedId={selectedTransaction?.id}
-      />
+    <div className="min-h-screen bg-background" data-testid="page-risk-compliance">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="mb-6">
+          <Link href="/">
+            <Button variant="ghost" className="gap-2 mb-4" data-testid="button-back">
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Button>
+          </Link>
+          <h1 className="text-xl font-semibold mb-1" data-testid="text-page-title">
+            Risk and Compliance Monitor
+          </h1>
+          <p className="text-sm text-muted-foreground" data-testid="text-page-subtitle">
+            Real-time transaction monitoring and compliance workflows
+          </p>
+        </div>
 
-      <TransactionDetailSidebar
-        transaction={selectedTransaction}
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+        <div className="space-y-6">
+          <GlobalMap hotspots={hotspots} onMarkerClick={handleMarkerClick} />
+          
+          <RiskyTransactionTable
+            transactions={allTransactions}
+            onTransactionClick={handleTransactionClick}
+            selectedId={selectedTransaction?.id}
+          />
+
+          <TransactionDetailSidebar
+            transaction={selectedTransaction}
+            open={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
+        </div>
+      </div>
     </div>
   );
 }
