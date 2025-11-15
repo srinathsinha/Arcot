@@ -4,6 +4,36 @@
 
 Arcot is a multi-agent system for risk, compliance, and treasury management built onchain. The application provides real-time monitoring of cryptocurrency transactions with intelligent risk detection using x402 payment-based compliance verification, and autonomous treasury rebalancing across multiple portfolios. The system is designed for crypto-native banking operations with sub-second compliance verification and institutional-grade execution.
 
+## Recent Changes (November 15, 2025)
+
+### Landing Page Enhancements
+- Comprehensive hero section with "Next-Gen Crypto Risk Management" messaging
+- Problem statement cards highlighting regulatory burden, fragmented tools, and manual oversight issues
+- Core pillars section: x402 Compliance, Multi-Agent Treasury, Real-Time Risk Engine
+- "How Arcot Works" timeline with 4-step flow visualization
+- Enhanced product modules with smooth scroll navigation to Monitor and Treasury sections
+
+### Monitor Page Features
+- Approve/Reject transaction flow in TransactionDetailSidebar
+- Toast notifications for approve (success) and reject (destructive) actions
+- 500ms delayed navigation to Treasury page after approve (for toast visibility)
+- Compliance tool state reset via resetState() method to prevent stale sender/receiver state on re-run
+- useEffect dependency changed to transaction?.id primitive for stable re-rendering
+
+### Treasury Page Features
+- RecentTransactionsTable component showing approved transactions with Monitor-style table layout
+- PortfolioGuardrailAlert triggering on >5% drift with Hyperliquid swap recommendations
+- Agent-to-agent swap execution modal with 5-agent workflow visualization
+- Animated progression through agents with status icons and timestamps
+- "Run Again" button to reset and re-execute swap workflow
+- Grid layout for RebalancingFeed and RecentTransactionsTable components
+
+### Technical Improvements
+- Fixed nested Card violation in PortfolioGuardrailAlert (replaced inner Card with div container)
+- Added reset mechanism for agent workflow steps with initialSteps reference
+- Consistent data-testid attributes across all new components
+- Dark mode compatibility for all new UI elements
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -25,18 +55,23 @@ Preferred communication style: Simple, everyday language.
 **State Management**: TanStack Query (React Query) for server state with custom query client configuration. Minimal client state using React hooks.
 
 **Routing**: Wouter for lightweight client-side routing with three main pages:
-- Home (landing page with feature cards)
-- Risk & Compliance Monitor
-- Treasury Management
+- Home (landing page with hero section, problem statement, core pillars, timeline, and product modules)
+- Risk & Compliance Monitor (transaction monitoring with approve/reject flow)
+- Treasury Management (portfolio tracking, guardrail alerts, and autonomous rebalancing)
 
 **Key UI Components**:
 - TransactionStream: Real-time transaction monitoring with status badges
-- RiskyTransactionTable: Detailed compliance analysis view
+- RiskyTransactionTable: Detailed compliance analysis view with approve/reject actions
+- TransactionDetailSidebar: Side panel for transaction compliance details with approve/reject buttons and toast notifications
 - TreasuryChart: Portfolio allocation visualization using Chart.js
 - AgentConsole: Typewriter-style log viewer for agent operations
 - GlobalMap: Geographic transaction activity visualization
 - PortfolioView: Multi-entity portfolio drift tracking
-- RebalancingFeed: Autonomous rebalancing operation stream
+- PortfolioMetrics: Key treasury metrics display (total value, drift %, last rebalance, active operations)
+- RebalancingFeed: Autonomous rebalancing operation stream with table layout
+- RecentTransactionsTable: Approved transaction history with From, To, Amount, Time, Approved By, Status columns
+- PortfolioGuardrailAlert: Alert component triggering on >5% drift with Hyperliquid swap recommendations
+- Agent-to-Agent Swap Execution Modal: 5-agent workflow visualization (Portfolio → Risk → Hyperliquid → Treasury → QA) with animated progression
 
 ### Backend Architecture
 
