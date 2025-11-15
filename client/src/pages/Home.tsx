@@ -10,9 +10,6 @@ export default function Home() {
       {/* Hero Section */}
       <div className="border-b border-card-border">
         <div className="max-w-6xl mx-auto px-6 py-16 text-center">
-          <Badge variant="secondary" className="mb-4" data-testid="badge-hero-tag">
-            Autonomous Risk & Compliance Officer
-          </Badge>
           <h1 className="text-5xl font-bold mb-6" data-testid="text-hero-title">
             Arcot
           </h1>
