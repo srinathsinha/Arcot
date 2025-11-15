@@ -41,31 +41,41 @@ export default function GlobalMap({ hotspots, onMarkerClick }: GlobalMapProps) {
           Global Transaction Activity
         </h2>
       </div>
-      <div className="relative h-[400px] bg-muted/20 overflow-hidden" data-testid="container-map">
-        <svg viewBox="0 0 1000 500" className="w-full h-full">
-          <rect width="1000" height="500" fill="currentColor" className="text-muted/10" />
+      <div className="relative h-[400px] bg-gradient-to-b from-blue-950/20 to-blue-900/10 dark:from-blue-950/30 dark:to-blue-900/20 overflow-hidden border-2 border-card-border/50 rounded-lg" data-testid="container-map">
+        <svg viewBox="0 0 1000 500" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="oceanGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#1e3a5f" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#0f1e3a" stopOpacity="0.2" />
+            </linearGradient>
+          </defs>
+          
+          <rect width="1000" height="500" fill="url(#oceanGradient)" />
           
           <path
             d="M 100 150 L 200 120 L 280 140 L 320 160 L 380 150 L 420 180 L 450 170 L 480 190 L 420 220 L 380 240 L 320 250 L 280 230 L 220 240 L 180 220 L 140 200 Z"
-            fill="currentColor"
-            className="text-card-border"
-            opacity="0.5"
+            fill="#4a5568"
+            stroke="#718096"
+            strokeWidth="1"
+            opacity="0.6"
             data-testid="map-region-north-america"
           />
           
           <path
             d="M 450 280 L 520 270 L 580 290 L 620 280 L 640 310 L 600 340 L 550 350 L 500 330 L 470 310 Z"
-            fill="currentColor"
-            className="text-card-border"
-            opacity="0.5"
+            fill="#4a5568"
+            stroke="#718096"
+            strokeWidth="1"
+            opacity="0.6"
             data-testid="map-region-europe"
           />
           
           <path
             d="M 650 300 L 720 290 L 780 310 L 820 330 L 800 360 L 750 380 L 700 370 L 670 350 Z"
-            fill="currentColor"
-            className="text-card-border"
-            opacity="0.5"
+            fill="#4a5568"
+            stroke="#718096"
+            strokeWidth="1"
+            opacity="0.6"
             data-testid="map-region-asia"
           />
           
@@ -125,10 +135,10 @@ export default function GlobalMap({ hotspots, onMarkerClick }: GlobalMapProps) {
             y1="200"
             x2="550"
             y2="320"
-            stroke="currentColor"
-            strokeWidth="1"
-            className="text-primary/40"
+            stroke="#3b82f6"
+            strokeWidth="2"
             strokeDasharray="5,5"
+            opacity="0.5"
           >
             <animate
               attributeName="stroke-dashoffset"
@@ -143,10 +153,10 @@ export default function GlobalMap({ hotspots, onMarkerClick }: GlobalMapProps) {
             y1="320"
             x2="720"
             y2="330"
-            stroke="currentColor"
-            strokeWidth="1"
-            className="text-primary/40"
+            stroke="#3b82f6"
+            strokeWidth="2"
             strokeDasharray="5,5"
+            opacity="0.5"
           >
             <animate
               attributeName="stroke-dashoffset"
