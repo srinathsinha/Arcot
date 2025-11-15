@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shield, TrendingUp, Zap, ArrowRight, AlertTriangle, Users, Lock, CheckCircle2 } from "lucide-react";
+import { Shield, TrendingUp, ArrowRight, Activity, DollarSign, Network, Wallet, Gauge, Clock, Coins } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Home() {
@@ -17,7 +17,7 @@ export default function Home() {
             Arcot
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8" data-testid="text-hero-subtitle">
-            Multi-agent system for onchain risk, compliance, and treasury management
+            Autonomous Risk Compliance Ops and Treasury for on-chain finance
           </p>
           <div className="flex gap-4 justify-center">
             <Link href="/monitor">
@@ -46,33 +46,31 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6 py-16">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold mb-6 text-center" data-testid="text-problem-title">
-              The Challenge
+              Problem
             </h2>
             <p className="text-lg text-muted-foreground mb-8 text-center" data-testid="text-problem-description">
-              Traditional compliance and treasury operations are manual, slow, and expensive. 
-              Onchain verification can take hours. Multi-entity treasury management requires constant human oversight. 
-              AML checks cost hundreds per transaction.
+              Compliance/Treasury Ops isn't ready for onchain + agentic scale
             </p>
             <div className="grid md:grid-cols-3 gap-6">
               <Card className="p-6" data-testid="card-problem-1">
-                <AlertTriangle className="w-8 h-8 text-yellow-600 mb-3" />
-                <h3 className="text-base font-semibold mb-2">Slow Verification</h3>
+                <Gauge className="w-8 h-8 text-yellow-600 mb-3" />
+                <h3 className="text-base font-semibold mb-2">Scale</h3>
                 <p className="text-sm text-muted-foreground">
-                  Hours-long compliance checks create bottlenecks and delay critical transactions
+                  Agentic commerce will process billions of transactions per day
                 </p>
               </Card>
               <Card className="p-6" data-testid="card-problem-2">
-                <Users className="w-8 h-8 text-yellow-600 mb-3" />
-                <h3 className="text-base font-semibold mb-2">Manual Processes</h3>
+                <Clock className="w-8 h-8 text-yellow-600 mb-3" />
+                <h3 className="text-base font-semibold mb-2">Speed</h3>
                 <p className="text-sm text-muted-foreground">
-                  Human-dependent workflows don't scale and introduce operational risk
+                  Review time needs to reduce from weeks to seconds
                 </p>
               </Card>
               <Card className="p-6" data-testid="card-problem-3">
-                <Lock className="w-8 h-8 text-yellow-600 mb-3" />
-                <h3 className="text-base font-semibold mb-2">High Costs</h3>
+                <Coins className="w-8 h-8 text-yellow-600 mb-3" />
+                <h3 className="text-base font-semibold mb-2">Cost</h3>
                 <p className="text-sm text-muted-foreground">
-                  Traditional AML and sanctions screening is prohibitively expensive at scale
+                  Humans are too expensive
                 </p>
               </Card>
             </div>
@@ -80,46 +78,54 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Core Pillars */}
+      {/* Product Modules */}
       <div className="border-b border-card-border">
         <div className="max-w-6xl mx-auto px-6 py-16">
-          <h2 className="text-3xl font-bold mb-12 text-center" data-testid="text-pillars-title">
-            Core Pillars
+          <h2 className="text-3xl font-bold mb-12 text-center" data-testid="text-modules-title">
+            Product Modules
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center" data-testid="pillar-1">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-md bg-primary/10 mb-4">
-                <Shield className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Intelligent Risk Detection</h3>
-              <p className="text-sm text-muted-foreground">
-                Multi-agent workflows monitor transactions globally with real-time AML, sanctions, and pattern analysis powered by x402 payments
-              </p>
-            </div>
-            <div className="text-center" data-testid="pillar-2">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-md bg-primary/10 mb-4">
-                <TrendingUp className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Autonomous Treasury</h3>
-              <p className="text-sm text-muted-foreground">
-                Coordinated agents maintain optimal allocations, execute rebalancing operations, and track drift across portfolios—all onchain
-              </p>
-            </div>
-            <div className="text-center" data-testid="pillar-3">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-md bg-primary/10 mb-4">
-                <Zap className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Built for Scale</h3>
-              <p className="text-sm text-muted-foreground">
-                Sub-second compliance verification, &lt;5s AI analysis, and transparent onchain execution for institutional-grade operations
-              </p>
-            </div>
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <Link href="/monitor">
+              <Card className="p-8 hover-elevate active-elevate-2 cursor-pointer transition-all group" data-testid="card-monitor">
+                <div className="flex items-center justify-between mb-4">
+                  <Shield className="w-12 h-12 text-primary" />
+                  <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                </div>
+                <h2 className="text-2xl font-semibold mb-3">Monitor</h2>
+                <p className="text-muted-foreground mb-6">
+                  Track global transaction flows, review flagged activities, and interact with compliance agents through intelligent workflows
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <Badge variant="secondary" className="text-xs">Global Activity</Badge>
+                  <Badge variant="secondary" className="text-xs">Agent Analysis</Badge>
+                  <Badge variant="secondary" className="text-xs">x402 Verification</Badge>
+                </div>
+              </Card>
+            </Link>
+
+            <Link href="/treasury">
+              <Card className="p-8 hover-elevate active-elevate-2 cursor-pointer transition-all group" data-testid="card-treasury">
+                <div className="flex items-center justify-between mb-4">
+                  <TrendingUp className="w-12 h-12 text-primary" />
+                  <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                </div>
+                <h2 className="text-2xl font-semibold mb-3">Treasury</h2>
+                <p className="text-muted-foreground mb-6">
+                  Oversee multi-entity portfolios, monitor allocation drift, and observe autonomous agent rebalancing in real-time
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <Badge variant="secondary" className="text-xs">Multi-Entity View</Badge>
+                  <Badge variant="secondary" className="text-xs">Drift Metrics</Badge>
+                  <Badge variant="secondary" className="text-xs">Agent Operations</Badge>
+                </div>
+              </Card>
+            </Link>
           </div>
         </div>
       </div>
 
       {/* How Arcot Works */}
-      <div id="how-it-works" className="border-b border-card-border bg-muted/30">
+      <div id="how-it-works" className="bg-muted/30">
         <div className="max-w-6xl mx-auto px-6 py-16">
           <h2 className="text-3xl font-bold mb-12 text-center" data-testid="text-how-it-works-title">
             How Arcot Works
@@ -128,8 +134,8 @@ export default function Home() {
             <div className="space-y-8">
               <div className="flex gap-6" data-testid="step-1">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                    1
+                  <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center">
+                    <Activity className="w-6 h-6 text-primary" />
                   </div>
                 </div>
                 <div>
@@ -142,8 +148,8 @@ export default function Home() {
 
               <div className="flex gap-6" data-testid="step-2">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                    2
+                  <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-primary" />
                   </div>
                 </div>
                 <div>
@@ -156,12 +162,12 @@ export default function Home() {
 
               <div className="flex gap-6" data-testid="step-3">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                    3
+                  <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center">
+                    <Network className="w-6 h-6 text-primary" />
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Multi-Agent Workflow</h3>
+                  <h3 className="text-lg font-semibold mb-2">Agent to Agent verification of Risk/Compliance</h3>
                   <p className="text-sm text-muted-foreground">
                     Sender and receiver agents independently verify transaction parties. Alert agents generate risk assessments. QA agents review findings and produce final verdicts—all coordinated autonomously.
                   </p>
@@ -170,8 +176,8 @@ export default function Home() {
 
               <div className="flex gap-6" data-testid="step-4">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                    4
+                  <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center">
+                    <Wallet className="w-6 h-6 text-primary" />
                   </div>
                 </div>
                 <div>
@@ -183,50 +189,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Product Modules */}
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        <h2 className="text-3xl font-bold mb-12 text-center" data-testid="text-modules-title">
-          Product Modules
-        </h2>
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          <Link href="/monitor">
-            <Card className="p-8 hover-elevate active-elevate-2 cursor-pointer transition-all group" data-testid="card-monitor">
-              <div className="flex items-center justify-between mb-4">
-                <Shield className="w-12 h-12 text-primary" />
-                <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-              </div>
-              <h2 className="text-2xl font-semibold mb-3">Monitor</h2>
-              <p className="text-muted-foreground mb-6">
-                Track global transaction flows, review flagged activities, and interact with compliance agents through intelligent workflows
-              </p>
-              <div className="flex gap-2 flex-wrap">
-                <Badge variant="secondary" className="text-xs">Global Activity</Badge>
-                <Badge variant="secondary" className="text-xs">Agent Analysis</Badge>
-                <Badge variant="secondary" className="text-xs">x402 Verification</Badge>
-              </div>
-            </Card>
-          </Link>
-
-          <Link href="/treasury">
-            <Card className="p-8 hover-elevate active-elevate-2 cursor-pointer transition-all group" data-testid="card-treasury">
-              <div className="flex items-center justify-between mb-4">
-                <TrendingUp className="w-12 h-12 text-primary" />
-                <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-              </div>
-              <h2 className="text-2xl font-semibold mb-3">Treasury</h2>
-              <p className="text-muted-foreground mb-6">
-                Oversee multi-entity portfolios, monitor allocation drift, and observe autonomous agent rebalancing in real-time
-              </p>
-              <div className="flex gap-2 flex-wrap">
-                <Badge variant="secondary" className="text-xs">Multi-Entity View</Badge>
-                <Badge variant="secondary" className="text-xs">Drift Metrics</Badge>
-                <Badge variant="secondary" className="text-xs">Agent Operations</Badge>
-              </div>
-            </Card>
-          </Link>
         </div>
       </div>
     </div>
