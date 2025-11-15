@@ -9,35 +9,35 @@ export default function Home() {
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold mb-4" data-testid="text-hero-title">
-            Autonomous Risk & Compliance Officer
+            Arcot
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto" data-testid="text-hero-subtitle">
-            AI-powered transaction monitoring and treasury management for crypto-native banks
+            Multi-agent system for risk, compliance, and treasury management—built onchain
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mb-16">
           <Card className="p-6" data-testid="card-feature-1">
             <Shield className="w-10 h-10 text-primary mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Real-time Compliance</h3>
+            <h3 className="text-lg font-semibold mb-2">Intelligent Risk Detection</h3>
             <p className="text-sm text-muted-foreground">
-              Monitor transactions globally with instant AML, sanctions, and geographic risk checks powered by x402 payments
+              Multi-agent workflows monitor transactions globally with real-time AML, sanctions, and pattern analysis powered by x402 payments
             </p>
           </Card>
 
           <Card className="p-6" data-testid="card-feature-2">
             <TrendingUp className="w-10 h-10 text-primary mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Automated Rebalancing</h3>
+            <h3 className="text-lg font-semibold mb-2">Autonomous Treasury</h3>
             <p className="text-sm text-muted-foreground">
-              Maintain optimal portfolio allocations across entities with autonomous treasury management and drift detection
+              Coordinated agents maintain optimal allocations, execute rebalancing operations, and track drift across portfolios—all onchain
             </p>
           </Card>
 
           <Card className="p-6" data-testid="card-feature-3">
             <Zap className="w-10 h-10 text-primary mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Lightning Fast</h3>
+            <h3 className="text-lg font-semibold mb-2">Built for Scale</h3>
             <p className="text-sm text-muted-foreground">
-              Sub-second compliance checks and &lt;5s AI-powered query responses for instant decision-making
+              Sub-second compliance verification, &lt;5s AI analysis, and transparent onchain execution for institutional-grade operations
             </p>
           </Card>
         </div>
@@ -51,12 +51,12 @@ export default function Home() {
               </div>
               <h2 className="text-2xl font-semibold mb-2">Monitor</h2>
               <p className="text-muted-foreground mb-4">
-                View global transaction activity, flagged transactions, and compliance workflows with x402 payment integration
+                Track global transaction flows, review flagged activities, and interact with compliance agents through intelligent workflows
               </p>
               <div className="flex gap-2 flex-wrap">
-                <div className="text-xs bg-muted px-2 py-1 rounded">Global Map</div>
-                <div className="text-xs bg-muted px-2 py-1 rounded">Risk Analysis</div>
-                <div className="text-xs bg-muted px-2 py-1 rounded">AI Chat</div>
+                <div className="text-xs bg-muted px-2 py-1 rounded">Global Activity</div>
+                <div className="text-xs bg-muted px-2 py-1 rounded">Agent Analysis</div>
+                <div className="text-xs bg-muted px-2 py-1 rounded">x402 Verification</div>
               </div>
             </Card>
           </Link>
@@ -69,12 +69,12 @@ export default function Home() {
               </div>
               <h2 className="text-2xl font-semibold mb-2">Treasury</h2>
               <p className="text-muted-foreground mb-4">
-                Manage portfolios across entities, track drift metrics, and monitor automated rebalancing operations
+                Oversee multi-entity portfolios, monitor allocation drift, and observe autonomous agent rebalancing in real-time
               </p>
               <div className="flex gap-2 flex-wrap">
-                <div className="text-xs bg-muted px-2 py-1 rounded">Portfolio View</div>
-                <div className="text-xs bg-muted px-2 py-1 rounded">Drift Tracking</div>
-                <div className="text-xs bg-muted px-2 py-1 rounded">Live Feed</div>
+                <div className="text-xs bg-muted px-2 py-1 rounded">Multi-Entity View</div>
+                <div className="text-xs bg-muted px-2 py-1 rounded">Drift Metrics</div>
+                <div className="text-xs bg-muted px-2 py-1 rounded">Agent Operations</div>
               </div>
             </Card>
           </Link>
