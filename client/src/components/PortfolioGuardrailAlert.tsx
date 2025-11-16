@@ -528,18 +528,7 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
             )}
           </div>
 
-          <div className="flex justify-end gap-3">
-            {!executing && agentSteps.every(s => s.status === "completed") && (
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  resetSteps();
-                }}
-                data-testid="button-reset"
-              >
-                Run Again
-              </Button>
-            )}
+          <div className="flex justify-end">
             <Button 
               variant="outline" 
               onClick={() => setShowExecutionModal(false)}
