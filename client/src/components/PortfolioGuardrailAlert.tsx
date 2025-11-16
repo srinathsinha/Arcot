@@ -112,35 +112,61 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
     },
     { 
       id: "3", 
-      agent: "Hyperliquid Agent", 
-      action: "Get quote from Hyperliquid DEX", 
+      agent: "Hyperliquid Trading Agent", 
+      action: "Request quote and place order via Hyperliquid exchange API", 
       status: "pending",
       debug: {
         request: {
           method: "POST",
-          url: "https://api.hyperliquid.xyz/info",
+          url: "https://api.hyperliquid.xyz/exchange",
           headers: {
             "Content-Type": "application/json"
           },
           body: {
-            type: "spotClearinghouseState",
-            user: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0"
+            action: {
+              type: "order",
+              coin: "ETH",
+              isBuy: false,
+              sz: "15",
+              limitPx: "3330.50",
+              reduceOnly: false,
+              tif: "Ioc"
+            },
+            nonce: 1731698400000,
+            signature: "<EIP-712-signed-typed-data>",
+            vaultAddress: null,
+            meta: {
+              token_from: "ETH",
+              token_to: "USDC",
+              amount_notional: "50000 USDC",
+              venue: "Hyperliquid",
+              order_type: "limit Ioc",
+              max_slippage: "0.5%",
+              estimated_gas_fees: "0.12 USDC",
+              network_fees: "0.08 USDC",
+              exchange_fee: "12.34 USDC",
+              agent_fee: "2.50 USDC",
+              usage_permission: "single_transaction_only"
+            }
           }
         },
         response: {
           status: 200,
           body: {
-            balances: [
-              { coin: "ETH", hold: "15.0", total: "15.0" },
-              { coin: "USDC", hold: "0", total: "125000" }
-            ],
-            quote: {
-              from: "ETH",
-              to: "USDC",
-              amount_in: "15.0",
-              amount_out: "50125.50",
-              price: "3341.70",
-              slippage: "0.25%"
+            status: "ok",
+            response: {
+              type: "order",
+              data: {
+                coin: "ETH",
+                isBuy: false,
+                sz: "15",
+                limitPx: "3330.50",
+                filledSz: "15",
+                avgPx: "3329.90",
+                fee: "12.34",
+                orderId: "123456789",
+                status: "filled"
+              }
             }
           }
         }
@@ -362,7 +388,7 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
           <DialogHeader>
             <DialogTitle data-testid="text-modal-title">Agent-to-Agent Swap Execution</DialogTitle>
             <DialogDescription data-testid="text-modal-description">
-              Multi-agent workflow executing swap via {recommendation.exchange}
+              Multi-agent workflow executing swap via Hyperliquid DEX API
             </DialogDescription>
           </DialogHeader>
 
@@ -435,6 +461,33 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
                           </CollapsibleTrigger>
                           <CollapsibleContent className="mt-2">
                             <div className="bg-muted/50 border rounded-md p-3 space-y-3 text-xs font-mono">
+                              {/* Note for demo purposes */}
+                              {step.agent === "Hyperliquid Trading Agent" && (
+                                <div className="text-xs text-muted-foreground italic font-sans mb-2">
+                                  Note: This demo uses a simplified Hyperliquid API call; responses may be mocked in this environment.
+                                </div>
+                              )}
+                              
+                              {/* Swap Parameters Summary */}
+                              {step.debug.request?.body?.meta && (
+                                <div>
+                                  <div className="font-semibold mb-2 font-sans">Swap Parameters (Arcot → Hyperliquid)</div>
+                                  <div className="grid grid-cols-2 gap-2 p-2 bg-background rounded border text-xs">
+                                    <div><span className="text-muted-foreground">From:</span> {step.debug.request.body.meta.token_from}</div>
+                                    <div><span className="text-muted-foreground">To:</span> {step.debug.request.body.meta.token_to}</div>
+                                    <div><span className="text-muted-foreground">Amount:</span> {step.debug.request.body.meta.amount_notional}</div>
+                                    <div><span className="text-muted-foreground">Venue:</span> {step.debug.request.body.meta.venue}</div>
+                                    <div><span className="text-muted-foreground">Order Type:</span> {step.debug.request.body.meta.order_type}</div>
+                                    <div><span className="text-muted-foreground">Max Slippage:</span> {step.debug.request.body.meta.max_slippage}</div>
+                                    <div><span className="text-muted-foreground">Gas Fees:</span> {step.debug.request.body.meta.estimated_gas_fees}</div>
+                                    <div><span className="text-muted-foreground">Network Fees:</span> {step.debug.request.body.meta.network_fees}</div>
+                                    <div><span className="text-muted-foreground">Exchange Fee:</span> {step.debug.request.body.meta.exchange_fee}</div>
+                                    <div><span className="text-muted-foreground">Agent Fee:</span> {step.debug.request.body.meta.agent_fee}</div>
+                                    <div className="col-span-2"><span className="text-muted-foreground">Permission:</span> {step.debug.request.body.meta.usage_permission}</div>
+                                  </div>
+                                </div>
+                              )}
+                              
                               {step.debug.payment && (
                                 <div>
                                   <div className="font-semibold mb-1 font-sans">Agent-to-Agent Payment</div>
@@ -468,7 +521,7 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
                               {step.debug.request && (
                                 <div>
                                   <div className="font-semibold mb-1 font-sans">
-                                    {step.debug.payment ? "Exchange API Request" : "API Request"}
+                                    {step.debug.payment ? "Hyperliquid Exchange API Request" : "API Request"}
                                   </div>
                                   <div className="text-muted-foreground mb-1">
                                     {step.debug.request.method} {step.debug.request.url}
