@@ -1,6 +1,6 @@
 # Arcot - Autonomous Risk & Compliance Officer
 
-**Live Demo**: [https://arcot.replit.app](https://arcot.replit.app)
+**Live Demo**: [https://getarcot.replit.app/](https://getarcot.replit.app/)
 
 ## Overview
 
