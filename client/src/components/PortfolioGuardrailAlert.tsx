@@ -2,7 +2,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { AlertTriangle, ArrowRight, TrendingUp, CheckCircle2, Loader2 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { AlertTriangle, ArrowRight, TrendingUp, CheckCircle2, Loader2, ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 interface SwapRecommendation {
@@ -20,24 +21,211 @@ interface GuardrailAlertProps {
   recommendation: SwapRecommendation | null;
 }
 
+interface APIDebug {
+  request?: {
+    method: string;
+    url: string;
+    headers?: Record<string, string>;
+    body?: any;
+  };
+  response?: {
+    status: number;
+    body?: any;
+  };
+  payment?: {
+    from: string;
+    to: string;
+    amount: string;
+    asset: string;
+    tx_hash?: string;
+  };
+}
+
 interface AgentStep {
   id: string;
   agent: string;
   action: string;
   status: "pending" | "in_progress" | "completed";
   timestamp?: string;
+  debug?: APIDebug;
 }
 
 export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAlertProps) {
   const [showExecutionModal, setShowExecutionModal] = useState(false);
   const [executing, setExecuting] = useState(false);
+  const [expandedDebug, setExpandedDebug] = useState<Record<number, boolean>>({});
   
   const initialSteps: AgentStep[] = [
-    { id: "1", agent: "Portfolio Agent", action: "Detected drift threshold breach", status: "pending" },
-    { id: "2", agent: "Risk Agent", action: "Validate swap parameters", status: "pending" },
-    { id: "3", agent: "Hyperliquid Agent", action: "Get quote from Hyperliquid DEX", status: "pending" },
-    { id: "4", agent: "Treasury Agent", action: "Execute swap transaction", status: "pending" },
-    { id: "5", agent: "QA Agent", action: "Verify settlement and update allocations", status: "pending" },
+    { 
+      id: "1", 
+      agent: "Portfolio Agent", 
+      action: "Detected drift threshold breach", 
+      status: "pending",
+      debug: {
+        request: {
+          method: "POST",
+          url: "https://arcot.internal/api/portfolio/check-drift",
+          body: {
+            portfolio_id: "market_maker_a",
+            threshold: 0.05
+          }
+        },
+        response: {
+          status: 200,
+          body: {
+            drift_detected: true,
+            current_drift: 0.085,
+            threshold: 0.05,
+            recommendation: "rebalance_required"
+          }
+        }
+      }
+    },
+    { 
+      id: "2", 
+      agent: "Risk Agent", 
+      action: "Validate swap parameters", 
+      status: "pending",
+      debug: {
+        request: {
+          method: "POST",
+          url: "https://arcot.internal/api/risk/validate-swap",
+          body: {
+            from_token: "ETH",
+            from_amount: 15,
+            to_token: "USDC",
+            to_amount: 50000,
+            exchange: "hyperliquid"
+          }
+        },
+        response: {
+          status: 200,
+          body: {
+            approved: true,
+            risk_score: 12,
+            max_slippage: "0.5%",
+            confidence: 0.98
+          }
+        }
+      }
+    },
+    { 
+      id: "3", 
+      agent: "Hyperliquid Agent", 
+      action: "Get quote from Hyperliquid DEX", 
+      status: "pending",
+      debug: {
+        request: {
+          method: "POST",
+          url: "https://api.hyperliquid.xyz/info",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: {
+            type: "spotClearinghouseState",
+            user: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0"
+          }
+        },
+        response: {
+          status: 200,
+          body: {
+            balances: [
+              { coin: "ETH", hold: "15.0", total: "15.0" },
+              { coin: "USDC", hold: "0", total: "125000" }
+            ],
+            quote: {
+              from: "ETH",
+              to: "USDC",
+              amount_in: "15.0",
+              amount_out: "50125.50",
+              price: "3341.70",
+              slippage: "0.25%"
+            }
+          }
+        }
+      }
+    },
+    { 
+      id: "4", 
+      agent: "Treasury Agent", 
+      action: "Execute swap transaction", 
+      status: "pending",
+      debug: {
+        payment: {
+          from: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+          to: "Hyperliquid: ETH/USDC Pool",
+          amount: "15.0",
+          asset: "ETH",
+          tx_hash: "0x8f5e2b9a1c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f"
+        },
+        request: {
+          method: "POST",
+          url: "https://api.hyperliquid.xyz/exchange",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer <CDP_WALLET_SIG>"
+          },
+          body: {
+            action: {
+              type: "order",
+              orders: [{
+                asset: "ETH",
+                isBuy: false,
+                limitPx: "3341.70",
+                sz: "15.0",
+                orderType: { limit: { tif: "Ioc" } }
+              }]
+            }
+          }
+        },
+        response: {
+          status: 200,
+          body: {
+            status: "ok",
+            response: {
+              type: "order",
+              data: {
+                statuses: [{
+                  filled: { totalSz: "15.0", avgPx: "3341.85" }
+                }]
+              }
+            }
+          }
+        }
+      }
+    },
+    { 
+      id: "5", 
+      agent: "QA Agent", 
+      action: "Verify settlement and update allocations", 
+      status: "pending",
+      debug: {
+        request: {
+          method: "POST",
+          url: "https://arcot.internal/api/qa/verify-settlement",
+          body: {
+            tx_hash: "0x8f5e2b9a1c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f",
+            expected_from: "ETH",
+            expected_to: "USDC",
+            expected_amount_out: 50000
+          }
+        },
+        response: {
+          status: 200,
+          body: {
+            verified: true,
+            actual_amount_out: "50127.75",
+            drift_after_swap: 0.021,
+            allocation_updated: true,
+            portfolio_state: {
+              ETH: { current: "40.2%", target: "40%" },
+              USDC: { current: "44.8%", target: "45%" },
+              BTC: { current: "15.0%", target: "15%" }
+            }
+          }
+        }
+      }
+    }
   ];
   
   const [agentSteps, setAgentSteps] = useState<AgentStep[]>(initialSteps);
@@ -215,6 +403,98 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
                           </span>
                         )}
                       </div>
+
+                      {/* API Details */}
+                      {step.debug && step.status === "completed" && (
+                        <Collapsible 
+                          open={expandedDebug[index]} 
+                          onOpenChange={(open) => setExpandedDebug(prev => ({ ...prev, [index]: open }))}
+                          className="mt-2"
+                        >
+                          <CollapsibleTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="w-full justify-between text-xs h-7"
+                              data-testid={`button-expand-debug-${index}`}
+                            >
+                              View API Details
+                              <ChevronDown className={`w-3 h-3 transition-transform ${expandedDebug[index] ? "rotate-180" : ""}`} />
+                            </Button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="mt-2">
+                            <div className="bg-muted/50 border rounded-md p-3 space-y-3 text-xs font-mono">
+                              {step.debug.payment && (
+                                <div>
+                                  <div className="font-semibold mb-1 font-sans">Agent-to-Agent Payment</div>
+                                  <div className="p-2 bg-background rounded border text-xs">
+                                    <div className="mb-1">
+                                      <span className="text-muted-foreground">From:</span> {step.debug.payment.from}
+                                    </div>
+                                    <div className="mb-1">
+                                      <span className="text-muted-foreground">To:</span> {step.debug.payment.to}
+                                    </div>
+                                    <div className="mb-1">
+                                      <span className="text-muted-foreground">Amount:</span> {step.debug.payment.amount} {step.debug.payment.asset}
+                                    </div>
+                                    {step.debug.payment.tx_hash && (
+                                      <div>
+                                        <span className="text-muted-foreground">TX Hash:</span>{" "}
+                                        <a 
+                                          href={`https://basescan.org/tx/${step.debug.payment.tx_hash}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-primary hover:underline"
+                                        >
+                                          {step.debug.payment.tx_hash.slice(0, 20)}...
+                                        </a>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {step.debug.request && (
+                                <div>
+                                  <div className="font-semibold mb-1 font-sans">
+                                    {step.debug.payment ? "Exchange API Request" : "API Request"}
+                                  </div>
+                                  <div className="text-muted-foreground mb-1">
+                                    {step.debug.request.method} {step.debug.request.url}
+                                  </div>
+                                  {step.debug.request.headers && (
+                                    <div className="mb-2">
+                                      <div className="text-muted-foreground">Headers:</div>
+                                      <pre className="whitespace-pre-wrap overflow-x-auto text-xs">
+                                        {JSON.stringify(step.debug.request.headers, null, 2)}
+                                      </pre>
+                                    </div>
+                                  )}
+                                  {step.debug.request.body && (
+                                    <div>
+                                      <div className="text-muted-foreground">Body:</div>
+                                      <pre className="whitespace-pre-wrap overflow-x-auto text-xs">
+                                        {JSON.stringify(step.debug.request.body, null, 2)}
+                                      </pre>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              
+                              {step.debug.response && (
+                                <div>
+                                  <div className="font-semibold mb-1 font-sans">
+                                    Response ({step.debug.response.status})
+                                  </div>
+                                  <pre className="whitespace-pre-wrap overflow-x-auto text-xs">
+                                    {JSON.stringify(step.debug.response.body, null, 2)}
+                                  </pre>
+                                </div>
+                              )}
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      )}
                     </Card>
                   </div>
                 ))}
