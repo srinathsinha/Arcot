@@ -1,0 +1,68 @@
+Align all Hyperliquid references with the real product and API so the demo looks credible to Hyperliquid / infra judges:
+
+- Use **“Hyperliquid Trading Agent”** (or “Hyperliquid Trading Adapter”), not “Hyperliquid AI Agent”.
+- Show a realistic REST call to Hyperliquid’s **exchange endpoint**.
+- Make it clear this is Arcot’s agent calling Hyperliquid’s API, not Hyperliquid running an AI agent.
+
+---
+
+## 1. Naming & Copy Updates in the UI
+
+1. In the **Agent-to-Agent Swap Execution** modal/timeline:
+   - Change step title:
+     - From: `Hyperliquid Agent`
+     - To: **`Hyperliquid Trading Agent`**
+   - Change subtitle/description:
+     - From something like: “Get quote from Hyperliquid DEX”
+     - To: **“Request quote and place order via Hyperliquid exchange API”**
+
+2. In any other place where we say “Hyperliquid AI Agent”, update to:
+   - **“Hyperliquid Trading Agent”** (for the timeline card label)
+   - Or, if it’s clearly an adapter: **“Hyperliquid Trading Adapter (Arcot → Hyperliquid API)”**
+
+3. In the modal header subtext:
+   - Use:  
+     **“Multi-agent workflow executing swap via Hyperliquid DEX API”**
+   - Avoid phrasing that implies Hyperliquid itself is running our AI agents.
+
+---
+
+## 2. Timeline Step Structure
+
+Keep the existing steps but adjust labels:
+
+1. `Portfolio Agent` – “Detected drift threshold breach”
+2. `Risk Agent` – “Validate swap parameters”
+3. **`Hyperliquid Trading Agent` – “Request quote & place order on Hyperliquid”**
+4. `Treasury Agent` – “Confirm and settle swap”
+5. `QA Agent` – “Verify settlement and update allocations”
+
+Ensure the “Hyperliquid Trading Agent” step has a **“View API Details”** expansion that shows a realistic Hyperliquid API call (next section).
+
+---
+
+## 3. “View API Details” – Hyperliquid Call (Realistic Shape)
+
+When the user expands **View API Details** on the Hyperliquid step, show:
+
+### 3.1 Request
+
+- **Method & URL:**
+  - `POST https://api.hyperliquid.xyz/exchange`
+- **Headers:**
+  - `Content-Type: application/json`
+- **Body (example – simplified):**
+  ```json
+  {
+    "action": {
+      "type": "order",
+      "coin": "ETH",
+      "isBuy": false,
+      "sz": "15",              // size in ETH
+      "limitPx": "3330.50",    // limit price
+      "reduceOnly": false,
+      "tif": "Ioc"             // immediate-or-cancel for market-like execution
+    },
+    "nonce": 1731698400000,
+    "signature": "<truncated-signature>"
+  }
