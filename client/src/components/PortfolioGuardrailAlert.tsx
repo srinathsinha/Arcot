@@ -55,6 +55,7 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
   const [executing, setExecuting] = useState(false);
   const [swapCompleted, setSwapCompleted] = useState(false);
   const [expandedDebug, setExpandedDebug] = useState<Record<number, boolean>>({});
+  const [currentDrift, setCurrentDrift] = useState(recommendation?.currentDrift || 0);
   
   const initialSteps: AgentStep[] = [
     { 
@@ -263,6 +264,7 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
     setAgentSteps([...initialSteps]);
     setExecuting(false);
     setSwapCompleted(false);
+    setCurrentDrift(recommendation?.currentDrift || 0);
   };
 
   const handleExecuteSwap = async () => {
@@ -293,6 +295,7 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
 
     setExecuting(false);
     setSwapCompleted(true);
+    setCurrentDrift(2.1); // Update to the drift after swap from QA Agent response
   };
 
   const getStatusIcon = (status: AgentStep["status"]) => {
@@ -309,33 +312,39 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
   return (
     <>
       <Card className={swapCompleted ? "border-green-600/50 bg-green-50 dark:bg-green-950/20" : "border-yellow-600/50 bg-yellow-50 dark:bg-yellow-950/20"} data-testid="card-guardrail-alert">
-        <div className="p-6 space-y-4">
-          <div className="flex items-start gap-4">
-            {swapCompleted ? (
-              <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
-            ) : (
-              <AlertTriangle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
-            )}
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-base font-semibold" data-testid="text-alert-title">
-                  {swapCompleted ? "Portfolio Rebalanced Successfully" : "Portfolio Guardrail Alert"}
-                </h3>
-                <Badge variant={swapCompleted ? "default" : "destructive"} className="text-xs">
-                  {swapCompleted ? "Completed" : "Action Required"}
-                </Badge>
+        <div className={swapCompleted ? "p-3 flex items-center gap-2" : "p-6 space-y-4"}>
+          {swapCompleted ? (
+            <>
+              <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+              <div className="flex-1">
+                <span className="text-sm font-medium" data-testid="text-alert-title">
+                  Portfolio Rebalanced Successfully
+                </span>
+                <span className="text-xs text-muted-foreground ml-2">
+                  Drift reduced to {currentDrift}%
+                </span>
               </div>
-              <p className="text-sm text-muted-foreground mb-3" data-testid="text-alert-description">
-                {swapCompleted 
-                  ? "Autonomous agents executed swap via Hyperliquid. Portfolio drift reduced to 2.1%."
-                  : recommendation.reason
-                }
-              </p>
+            </>
+          ) : (
+            <div className="flex items-start gap-4">
+              <AlertTriangle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-base font-semibold" data-testid="text-alert-title">
+                    Portfolio Guardrail Alert
+                  </h3>
+                  <Badge variant="destructive" className="text-xs">
+                    Action Required
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3" data-testid="text-alert-description">
+                  {recommendation.reason}
+                </p>
 
               <div className="flex items-center gap-4 text-sm mb-4">
                 <div data-testid="text-current-drift">
                   <span className="text-muted-foreground">Current Drift:</span>{" "}
-                  <span className="font-semibold text-red-600">{recommendation.currentDrift}%</span>
+                  <span className="font-semibold text-red-600">{currentDrift}%</span>
                 </div>
                 <div data-testid="text-target-drift">
                   <span className="text-muted-foreground">Target:</span>{" "}
@@ -343,42 +352,43 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
                 </div>
               </div>
 
-              <div className="p-4 bg-background border border-card-border rounded-md" data-testid="card-recommendation">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="text-center" data-testid="swap-from">
-                      <div className="text-lg font-semibold">{recommendation.fromAmount} {recommendation.fromToken}</div>
-                      <div className="text-xs text-muted-foreground">From</div>
+                <div className="p-4 bg-background border border-card-border rounded-md" data-testid="card-recommendation">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="text-center" data-testid="swap-from">
+                        <div className="text-lg font-semibold">{recommendation.fromAmount} {recommendation.fromToken}</div>
+                        <div className="text-xs text-muted-foreground">From</div>
+                      </div>
+                      
+                      <ArrowRight className="w-5 h-5 text-primary" />
+                      
+                      <div className="text-center" data-testid="swap-to">
+                        <div className="text-lg font-semibold">{recommendation.toAmount} {recommendation.toToken}</div>
+                        <div className="text-xs text-muted-foreground">To</div>
+                      </div>
                     </div>
-                    
-                    <ArrowRight className="w-5 h-5 text-primary" />
-                    
-                    <div className="text-center" data-testid="swap-to">
-                      <div className="text-lg font-semibold">{recommendation.toAmount} {recommendation.toToken}</div>
-                      <div className="text-xs text-muted-foreground">To</div>
-                    </div>
-                  </div>
 
-                  <div className="text-right">
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
-                      <TrendingUp className="w-4 h-4" />
-                      <span data-testid="text-exchange">via {recommendation.exchange}</span>
+                    <div className="text-right">
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
+                        <TrendingUp className="w-4 h-4" />
+                        <span data-testid="text-exchange">via {recommendation.exchange}</span>
+                      </div>
+                      {!swapCompleted && (
+                        <Button 
+                          size="sm" 
+                          onClick={handleExecuteSwap}
+                          disabled={executing}
+                          data-testid="button-execute-swap"
+                        >
+                          Execute Swap
+                        </Button>
+                      )}
                     </div>
-                    {!swapCompleted && (
-                      <Button 
-                        size="sm" 
-                        onClick={handleExecuteSwap}
-                        disabled={executing}
-                        data-testid="button-execute-swap"
-                      >
-                        Execute Swap
-                      </Button>
-                    )}
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </Card>
 
