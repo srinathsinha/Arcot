@@ -19,7 +19,7 @@ export default function Treasury() {
     toToken: "USDC",
     toAmount: 50000,
     exchange: "Hyperliquid",
-    reason: "Market Maker A portfolio drift exceeded 5% threshold. ETH allocation is 8.5% above target.",
+    reason: "Coinbase Commerce portfolio drift exceeded 5% threshold. ETH allocation is 8.5% above target.",
     currentDrift: 8.5,
     targetDrift: 2.0,
   } : null;
@@ -27,7 +27,7 @@ export default function Treasury() {
   const portfolios: EntityPortfolio[] = [
     {
       id: "1",
-      name: "Market Maker A",
+      name: "Coinbase Commerce",
       tokens: [
         { symbol: "ETH", amount: 50, currentPercentage: 45, targetPercentage: 40, icon: "◆" },
         { symbol: "USDC", amount: 100000, currentPercentage: 40, targetPercentage: 45, icon: "💵" },
@@ -36,7 +36,7 @@ export default function Treasury() {
     },
     {
       id: "2",
-      name: "Liquidity Pool B",
+      name: "Stripe Treasury",
       tokens: [
         { symbol: "ETH", amount: 30, currentPercentage: 50, targetPercentage: 45, icon: "◆" },
         { symbol: "USDC", amount: 50000, currentPercentage: 35, targetPercentage: 40, icon: "💵" },
@@ -45,7 +45,7 @@ export default function Treasury() {
     },
     {
       id: "3",
-      name: "Reserve Fund C",
+      name: "Shopify Payments",
       tokens: [
         { symbol: "ETH", amount: 20, currentPercentage: 38, targetPercentage: 40, icon: "◆" },
         { symbol: "USDC", amount: 75000, currentPercentage: 48, targetPercentage: 45, icon: "💵" },

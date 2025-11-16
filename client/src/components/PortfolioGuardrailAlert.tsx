@@ -53,6 +53,7 @@ interface AgentStep {
 export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAlertProps) {
   const [showExecutionModal, setShowExecutionModal] = useState(false);
   const [executing, setExecuting] = useState(false);
+  const [swapCompleted, setSwapCompleted] = useState(false);
   const [expandedDebug, setExpandedDebug] = useState<Record<number, boolean>>({});
   
   const initialSteps: AgentStep[] = [
@@ -235,6 +236,7 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
   const resetSteps = () => {
     setAgentSteps([...initialSteps]);
     setExecuting(false);
+    setSwapCompleted(false);
   };
 
   const handleExecuteSwap = async () => {
@@ -264,37 +266,44 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
     }
 
     setExecuting(false);
+    setSwapCompleted(true);
   };
 
   const getStatusIcon = (status: AgentStep["status"]) => {
-    if (status === "completed") return <CheckCircle2 className="w-5 h-5 text-green-600" />;
     if (status === "in_progress") return <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />;
-    return <div className="w-5 h-5 rounded-full border-2 border-muted" />;
+    return null; // No icon for pending or completed - the bubble shows the checkmark
   };
 
   const getStatusColor = (status: AgentStep["status"]) => {
     if (status === "completed") return "border-green-600 bg-green-600";
     if (status === "in_progress") return "border-blue-600 bg-blue-600";
-    return "border-muted bg-muted";
+    return "border-muted bg-background";
   };
 
   return (
     <>
-      <Card className="border-yellow-600/50 bg-yellow-50 dark:bg-yellow-950/20" data-testid="card-guardrail-alert">
+      <Card className={swapCompleted ? "border-green-600/50 bg-green-50 dark:bg-green-950/20" : "border-yellow-600/50 bg-yellow-50 dark:bg-yellow-950/20"} data-testid="card-guardrail-alert">
         <div className="p-6 space-y-4">
           <div className="flex items-start gap-4">
-            <AlertTriangle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
+            {swapCompleted ? (
+              <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
+            ) : (
+              <AlertTriangle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
+            )}
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="text-base font-semibold" data-testid="text-alert-title">
-                  Portfolio Guardrail Alert
+                  {swapCompleted ? "Portfolio Rebalanced Successfully" : "Portfolio Guardrail Alert"}
                 </h3>
-                <Badge variant="destructive" className="text-xs">
-                  Action Required
+                <Badge variant={swapCompleted ? "default" : "destructive"} className="text-xs">
+                  {swapCompleted ? "Completed" : "Action Required"}
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground mb-3" data-testid="text-alert-description">
-                {recommendation.reason}
+                {swapCompleted 
+                  ? "Autonomous agents executed swap via Hyperliquid. Portfolio drift reduced to 2.1%."
+                  : recommendation.reason
+                }
               </p>
 
               <div className="flex items-center gap-4 text-sm mb-4">
@@ -329,14 +338,16 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
                       <TrendingUp className="w-4 h-4" />
                       <span data-testid="text-exchange">via {recommendation.exchange}</span>
                     </div>
-                    <Button 
-                      size="sm" 
-                      onClick={handleExecuteSwap}
-                      disabled={executing}
-                      data-testid="button-execute-swap"
-                    >
-                      Execute Swap
-                    </Button>
+                    {!swapCompleted && (
+                      <Button 
+                        size="sm" 
+                        onClick={handleExecuteSwap}
+                        disabled={executing}
+                        data-testid="button-execute-swap"
+                      >
+                        Execute Swap
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -381,7 +392,7 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
                       className={`absolute left-0 w-5 h-5 rounded-full border-2 ${getStatusColor(step.status)} flex items-center justify-center`}
                       style={{ top: '2px' }}
                     >
-                      {step.status === "completed" && <div className="w-2 h-2 bg-white rounded-full" />}
+                      {step.status === "completed" && <CheckCircle2 className="w-4 h-4 text-white" />}
                     </div>
 
                     <Card className="p-3">
