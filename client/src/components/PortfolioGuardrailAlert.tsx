@@ -461,13 +461,6 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
                           </CollapsibleTrigger>
                           <CollapsibleContent className="mt-2">
                             <div className="bg-muted/50 border rounded-md p-3 space-y-3 text-xs font-mono">
-                              {/* Note for demo purposes */}
-                              {step.agent === "Hyperliquid Trading Agent" && (
-                                <div className="text-xs text-muted-foreground italic font-sans mb-2">
-                                  Note: This demo uses a simplified Hyperliquid API call; responses may be mocked in this environment.
-                                </div>
-                              )}
-                              
                               {/* Swap Parameters Summary */}
                               {step.debug.request?.body?.meta && (
                                 <div>
