@@ -7,7 +7,9 @@ export default function TransactionDetailSidebarExample() {
   
   const mockTransaction = {
     id: "1",
+    numericId: 9821,
     token: "USDC",
+    amount: 8200,
     from: "0xa1b2c3d4e5f67890abcdef",
     to: "0x9876543210abcdef123456",
     timestamp: "2m ago",
@@ -23,6 +25,7 @@ export default function TransactionDetailSidebarExample() {
         transaction={mockTransaction}
         open={open}
         onClose={() => setOpen(false)}
+        onDecision={() => setOpen(false)}
       />
     </div>
   );
