@@ -12,7 +12,7 @@ export interface ApprovedTransaction {
   to: string;
   timestamp: string;
   approvedBy: string;
-  status: "approved" | "processed" | "settled";
+  status: "approved" | "processed" | "settled" | "executed";
 }
 
 interface RecentTransactionsTableProps {
@@ -29,7 +29,8 @@ export default function RecentTransactionsTable({ transactions }: RecentTransact
     const variants: Record<string, { variant: any; label: string }> = {
       "approved": { variant: "default", label: "Approved" },
       "processed": { variant: "secondary", label: "Processed" },
-      "settled": { variant: "default", label: "Settled" }
+      "settled": { variant: "default", label: "Settled" },
+      "executed": { variant: "default", label: "Executed" }
     };
     
     const config = variants[status];

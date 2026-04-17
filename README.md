@@ -1,6 +1,6 @@
 # Arcot - Autonomous Risk & Compliance Officer
 
-**Live Demo**: [https://getarcot.replit.app/](https://getarcot.replit.app/)
+**Live Demo**: Deploy this repo to Render Free Web Service for an `*.onrender.com` demo URL.
 
 ## Overview
 
@@ -8,31 +8,31 @@ Arcot is a next-generation multi-agent system for onchain risk, compliance, and 
 
 ## Key Features
 
-### 🔍 Real-Time Risk & Compliance Monitor
+### Real-Time Risk & Compliance Monitor
 - Transaction stream monitoring with risk flagging
 - Approve/reject workflow with detailed compliance analysis
 - x402 payment-based compliance verification
 - Multi-agent compliance checks (sanctions screening, AML/KYC, geo-restrictions)
 - Transaction detail sidebar with complete compliance metadata
 
-### 💼 Multi-Agent Treasury Management
+### Multi-Agent Treasury Management
 - Portfolio drift tracking across multiple entities (Coinbase Commerce, Stripe Treasury, Shopify Payments)
 - Autonomous guardrail alerts triggering on >5% portfolio drift
 - Real-time portfolio allocation visualization
 - Recent transaction history with approval tracking
 
-### 🤖 Agent-to-Agent Swap Execution
+### Agent-to-Agent Swap Execution
 - 5-agent workflow orchestration (Portfolio → Risk → Hyperliquid → Treasury → QA)
-- Live Hyperliquid DEX integration via real API endpoint (`POST https://api.hyperliquid.xyz/exchange`)
+- Demo Hyperliquid DEX interaction using API-shaped payloads (`POST https://api.hyperliquid.xyz/exchange`)
 - Comprehensive swap parameter visibility:
   - Token pairs and notional amounts
   - Order type and venue details
   - Fee breakdown (gas, network, exchange, agent)
   - Slippage protection and usage permissions
 - Animated workflow progression with status indicators
-- Dynamic drift updates (8.5% → 2.1% after rebalancing)
+- Dynamic allocation updates (USDC 46% → 39% after rebalancing)
 
-### 🌍 Global Activity Visualization
+### Global Activity Visualization
 - Geographic transaction activity map
 - Agent operation console with typewriter-style logs
 - Real-time rebalancing feed
@@ -49,13 +49,13 @@ Arcot is a next-generation multi-agent system for onchain risk, compliance, and 
 
 **Backend**
 - Node.js + Express
-- PostgreSQL (Neon serverless)
-- Drizzle ORM
+- Express-served demo API and static production build
+- Drizzle ORM schema support
 
 **Integrations**
-- Hyperliquid DEX API (real swap execution)
-- x402 Payment Protocol (compliance verification)
-- Coinbase CDP Server Wallets (payment processing - demo mode)
+- Hyperliquid DEX API-shaped demo exchange flow
+- x402 Payment Protocol-shaped compliance verification
+- Coinbase CDP Server Wallet-shaped payment processing in demo mode
 
 ## Architecture
 
@@ -90,7 +90,6 @@ Arcot's interface draws inspiration from fintech leaders like Stripe Dashboard, 
 
 ### Prerequisites
 - Node.js 20+
-- PostgreSQL database
 
 ### Installation
 
@@ -104,6 +103,29 @@ npm run dev
 
 The application will be available at `http://localhost:5000`.
 
+### Production Build
+
+```bash
+npm run check
+npm run build
+npm run start
+```
+
+The production server serves the Vite build from `dist/public` and binds to `process.env.PORT`, which works for Render.
+
+### Render Free Web Service
+
+Create a new Render Web Service from this GitHub repo or use the included `render.yaml`.
+
+```text
+Runtime: Node
+Build command: npm install && npm run build
+Start command: npm run start
+Environment: NODE_ENV=production
+```
+
+The demo runs without CDP secrets. Free Render services can cold start after inactivity, so open the URL shortly before presenting.
+
 ### Environment Variables
 
 ```bash
@@ -111,11 +133,11 @@ The application will be available at `http://localhost:5000`.
 CDP_API_KEY_NAME=your_api_key_name
 CDP_PRIVATE_KEY=your_private_key
 
-# Session management
+# Optional session management
 SESSION_SECRET=your_session_secret
 ```
 
-**Note**: The application runs in demo mode without CDP credentials, using mock wallets for payment simulation.
+**Note**: The application runs in demo mode without CDP credentials, using mock wallets and simulated/testnet-shaped payment hashes.
 
 ## Project Structure
 
@@ -135,8 +157,11 @@ arcot/
 │   └── lib/
 │       └── queryClient.ts     # TanStack Query configuration
 ├── server/
-│   ├── index.ts              # Express server & CDP wallet setup
-│   ├── routes.ts             # API endpoints (compliance, liquidity)
+│   ├── index.ts              # Express server & static production serving
+│   ├── routes.ts             # API endpoints for compliance demo
+│   ├── cdp-wallet.ts         # Demo-mode CDP wallet simulator
+│   ├── compliance-tool.ts    # x402-style compliance simulator
+│   ├── orchestrator.ts       # Compliance timeline orchestration
 │   └── storage.ts            # In-memory storage layer
 ├── shared/
 │   └── schema.ts             # Shared type definitions
@@ -145,10 +170,8 @@ arcot/
 
 ## API Endpoints
 
-- `POST /api/compliance/check` - Initiate compliance verification
-- `POST /api/compliance/pay` - Process payment intent
-- `POST /api/compliance/verify` - Return compliance verdict
-- `POST /api/liquidity/quote` - Get asset swap quote
+- `POST /api/transactions/:id/run-compliance` - Run the full demo compliance workflow
+- `POST /tools/compliance/check` - Simulated Locus/x402 compliance resource server
 
 ## Future Enhancements
 
@@ -174,4 +197,4 @@ Contributions welcome! Please open an issue or submit a pull request.
 
 ---
 
-Built with ❤️ for the future of crypto-native banking
+Built for the future of crypto-native banking

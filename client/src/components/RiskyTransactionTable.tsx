@@ -14,6 +14,7 @@ export interface RiskyTransaction {
   complianceResult: "AML Flag" | "Sanctions Match" | "Velocity Check" | "Geographic Risk" | "Pattern Detection";
   latency: number;
   riskLevel: "suspicious" | "confirmed";
+  decisionStatus?: "approved" | "rejected";
 }
 
 interface RiskyTransactionTableProps {
@@ -32,7 +33,15 @@ export default function RiskyTransactionTable({
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const getComplianceBadge = (result: RiskyTransaction["complianceResult"]) => {
+  const getComplianceBadge = (transaction: RiskyTransaction) => {
+    if (transaction.decisionStatus === "approved") {
+      return <Badge className="text-xs bg-green-600 hover:bg-green-700">Approved</Badge>;
+    }
+
+    if (transaction.decisionStatus === "rejected") {
+      return <Badge variant="destructive" className="text-xs bg-red-600 hover:bg-red-700">Rejected</Badge>;
+    }
+
     const variants: Record<string, any> = {
       "AML Flag": "destructive",
       "Sanctions Match": "destructive",
@@ -42,8 +51,8 @@ export default function RiskyTransactionTable({
     };
     
     return (
-      <Badge variant={variants[result]} className="text-xs">
-        {result}
+      <Badge variant={variants[transaction.complianceResult]} className="text-xs">
+        {transaction.complianceResult}
       </Badge>
     );
   };
@@ -115,7 +124,7 @@ export default function RiskyTransactionTable({
                     {tx.timestamp}
                   </TableCell>
                   <TableCell data-testid={`cell-compliance-${tx.id}`}>
-                    {getComplianceBadge(tx.complianceResult)}
+                    {getComplianceBadge(tx)}
                   </TableCell>
                   <TableCell className={`text-right text-xs font-mono ${getLatencyColor(tx.latency)}`} data-testid={`cell-latency-${tx.id}`}>
                     {tx.latency}ms

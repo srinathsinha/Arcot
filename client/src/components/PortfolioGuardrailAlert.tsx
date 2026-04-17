@@ -19,6 +19,7 @@ interface SwapRecommendation {
 
 interface GuardrailAlertProps {
   recommendation: SwapRecommendation | null;
+  onSwapComplete?: () => void;
 }
 
 interface APIDebug {
@@ -50,7 +51,7 @@ interface AgentStep {
   debug?: APIDebug;
 }
 
-export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAlertProps) {
+export default function PortfolioGuardrailAlert({ recommendation, onSwapComplete }: GuardrailAlertProps) {
   const [showExecutionModal, setShowExecutionModal] = useState(false);
   const [executing, setExecuting] = useState(false);
   const [swapCompleted, setSwapCompleted] = useState(false);
@@ -69,15 +70,15 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
           url: "https://arcot.internal/api/portfolio/check-drift",
           body: {
             portfolio_id: "market_maker_a",
-            threshold: 0.05
+            usdc_guardrail_max: 0.4
           }
         },
         response: {
           status: 200,
           body: {
-            drift_detected: true,
-            current_drift: 0.085,
-            threshold: 0.05,
+            guardrail_breached: true,
+            current_usdc_allocation: 0.46,
+            usdc_guardrail_max: 0.4,
             recommendation: "rebalance_required"
           }
         }
@@ -93,10 +94,10 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
           method: "POST",
           url: "https://arcot.internal/api/risk/validate-swap",
           body: {
-            from_token: "ETH",
-            from_amount: 15,
-            to_token: "USDC",
-            to_amount: 50000,
+            from_token: "USDC",
+            from_amount: 5000,
+            to_token: "ETH",
+            to_amount: 1.5,
             exchange: "hyperliquid"
           }
         },
@@ -127,8 +128,8 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
             action: {
               type: "order",
               coin: "ETH",
-              isBuy: false,
-              sz: "15",
+              isBuy: true,
+              sz: "1.5",
               limitPx: "3330.50",
               reduceOnly: false,
               tif: "Ioc"
@@ -137,9 +138,9 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
             signature: "<EIP-712-signed-typed-data>",
             vaultAddress: null,
             meta: {
-              token_from: "ETH",
-              token_to: "USDC",
-              amount_notional: "50000 USDC",
+              token_from: "USDC",
+              token_to: "ETH",
+              amount_notional: "5000 USDC",
               venue: "Hyperliquid",
               order_type: "limit Ioc",
               max_slippage: "0.5%",
@@ -159,10 +160,10 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
               type: "order",
               data: {
                 coin: "ETH",
-                isBuy: false,
-                sz: "15",
+                isBuy: true,
+                sz: "1.5",
                 limitPx: "3330.50",
-                filledSz: "15",
+                filledSz: "1.5",
                 avgPx: "3329.90",
                 fee: "12.34",
                 orderId: "123456789",
@@ -182,8 +183,8 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
         payment: {
           from: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
           to: "Hyperliquid: ETH/USDC Pool",
-          amount: "15.0",
-          asset: "ETH",
+          amount: "5000",
+          asset: "USDC",
           tx_hash: "0x8f5e2b9a1c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f"
         },
         request: {
@@ -198,9 +199,9 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
               type: "order",
               orders: [{
                 asset: "ETH",
-                isBuy: false,
+                isBuy: true,
                 limitPx: "3341.70",
-                sz: "15.0",
+                sz: "1.5",
                 orderType: { limit: { tif: "Ioc" } }
               }]
             }
@@ -214,7 +215,7 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
               type: "order",
               data: {
                 statuses: [{
-                  filled: { totalSz: "15.0", avgPx: "3341.85" }
+                  filled: { totalSz: "1.5", avgPx: "3341.85" }
                 }]
               }
             }
@@ -233,21 +234,21 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
           url: "https://arcot.internal/api/qa/verify-settlement",
           body: {
             tx_hash: "0x8f5e2b9a1c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f",
-            expected_from: "ETH",
-            expected_to: "USDC",
-            expected_amount_out: 50000
+            expected_from: "USDC",
+            expected_to: "ETH",
+            expected_amount_out: 1.5
           }
         },
         response: {
           status: 200,
           body: {
             verified: true,
-            actual_amount_out: "50127.75",
-            drift_after_swap: 0.021,
+            actual_amount_out: "1.49 ETH",
+            usdc_allocation_after_swap: "39%",
             allocation_updated: true,
             portfolio_state: {
-              ETH: { current: "40.2%", target: "40%" },
-              USDC: { current: "44.8%", target: "45%" },
+              ETH: { current: "46.0%", target: "45%" },
+              USDC: { current: "39.0%", target: "35-40%" },
               BTC: { current: "15.0%", target: "15%" }
             }
           }
@@ -295,7 +296,8 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
 
     setExecuting(false);
     setSwapCompleted(true);
-    setCurrentDrift(2.1); // Update to the drift after swap from QA Agent response
+    setCurrentDrift(39);
+    onSwapComplete?.();
   };
 
   const getStatusIcon = (status: AgentStep["status"]) => {
@@ -318,10 +320,10 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
               <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
               <div className="flex-1">
                 <span className="text-sm font-medium" data-testid="text-alert-title">
-                  Portfolio Rebalanced Successfully
+                  Guardrail Back In Range
                 </span>
                 <span className="text-xs text-muted-foreground ml-2">
-                  Drift reduced to {currentDrift}%
+                  New USDC allocation: 39%
                 </span>
               </div>
             </>
@@ -343,12 +345,12 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
 
               <div className="flex items-center gap-4 text-sm mb-4">
                 <div data-testid="text-current-drift">
-                  <span className="text-muted-foreground">Current Drift:</span>{" "}
+                  <span className="text-muted-foreground">Current USDC allocation:</span>{" "}
                   <span className="font-semibold text-red-600">{currentDrift}%</span>
                 </div>
                 <div data-testid="text-target-drift">
                   <span className="text-muted-foreground">Target:</span>{" "}
-                  <span className="font-semibold text-green-600">{recommendation.targetDrift}%</span>
+                  <span className="font-semibold text-green-600">35-40%</span>
                 </div>
               </div>
 
@@ -380,7 +382,7 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
                           disabled={executing}
                           data-testid="button-execute-swap"
                         >
-                          Execute Swap
+                          Review Swap on Hyperliquid
                         </Button>
                       )}
                     </div>
@@ -396,9 +398,9 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
       <Dialog open={showExecutionModal} onOpenChange={setShowExecutionModal}>
         <DialogContent className="sm:max-w-[600px]" data-testid="modal-swap-execution">
           <DialogHeader>
-            <DialogTitle data-testid="text-modal-title">Agent-to-Agent Swap Execution</DialogTitle>
+            <DialogTitle data-testid="text-modal-title">Recommended Rebalancing Swap</DialogTitle>
             <DialogDescription data-testid="text-modal-description">
-              Multi-agent workflow executing swap via Hyperliquid DEX API
+              Arcot Treasury Agent requests a one-time Hyperliquid swap and shows the parameters before execution.
             </DialogDescription>
           </DialogHeader>
 
@@ -576,7 +578,7 @@ export default function PortfolioGuardrailAlert({ recommendation }: GuardrailAle
                   <div>
                     <div className="font-semibold text-sm">Swap Completed Successfully</div>
                     <div className="text-xs text-muted-foreground">
-                      Portfolio drift reduced from {recommendation.currentDrift}% to {recommendation.targetDrift}%
+                      Guardrail resolved. USDC allocation moved from 46% to 39%.
                     </div>
                   </div>
                 </div>

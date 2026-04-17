@@ -15,6 +15,7 @@ interface TransactionDetailSidebarProps {
   transaction: RiskyTransaction | null;
   open: boolean;
   onClose: () => void;
+  onDecision: (transaction: RiskyTransaction, decision: "approved" | "rejected") => void;
 }
 
 interface TimelineEvent {
@@ -54,7 +55,8 @@ interface ComplianceResponse {
 export default function TransactionDetailSidebar({ 
   transaction, 
   open, 
-  onClose 
+  onClose,
+  onDecision,
 }: TransactionDetailSidebarProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -107,6 +109,18 @@ export default function TransactionDetailSidebar({
 
   const handleApprove = () => {
     if (transaction) {
+      onDecision(transaction, "approved");
+      sessionStorage.setItem("arcot-approved-transaction", JSON.stringify({
+        id: transaction.id,
+        numericId: transaction.numericId,
+        token: transaction.token,
+        amount: transaction.amount,
+        from: transaction.from,
+        to: transaction.to,
+        timestamp: "Just now",
+        approvedBy: "Arcot Compliance Agent",
+        status: "approved",
+      }));
       toast({
         title: "Transaction Approved",
         description: `Transaction ${transaction.id} has been approved and forwarded to Treasury.`,
@@ -120,6 +134,7 @@ export default function TransactionDetailSidebar({
 
   const handleReject = () => {
     if (transaction) {
+      onDecision(transaction, "rejected");
       toast({
         title: "Transaction Rejected",
         description: `Transaction ${transaction.id} has been rejected and flagged for review.`,
@@ -319,8 +334,9 @@ export default function TransactionDetailSidebar({
 
                               {event.tx_hash && (
                                 <div className="text-xs">
-                                  <span className="text-muted-foreground">Payment: </span>
+                                  <span className="text-muted-foreground">Demo payment: </span>
                                   <span className="font-semibold">Arcot Agent → Compliance Tool</span>
+                                  <Badge variant="outline" className="ml-2 text-[10px]">Simulated testnet tx</Badge>
                                   <div className="mt-1">
                                     <a 
                                       href={`https://sepolia.basescan.org/tx/${event.tx_hash}`}

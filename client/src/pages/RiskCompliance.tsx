@@ -16,14 +16,14 @@ export default function RiskCompliance() {
     { id: "5", lat: -23, lng: -46, riskLevel: "suspicious", count: 4, region: "South America" },
   ];
 
-  const allTransactions: RiskyTransaction[] = [
+  const [transactions, setTransactions] = useState<RiskyTransaction[]>([
     {
       id: "tx-1",
       numericId: 9821,
       token: "USDC",
-      amount: 50000,
-      from: "0xa1b2c3d4e5f6",
-      to: "0x9876543210ab",
+      amount: 8200,
+      from: "0x19a3c8e7b9f24d6a81f2b77f5c0bb7c2",
+      to: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
       timestamp: "2m ago",
       complianceResult: "AML Flag",
       latency: 250,
@@ -77,7 +77,7 @@ export default function RiskCompliance() {
       latency: 210,
       riskLevel: "suspicious"
     }
-  ];
+  ]);
 
   const handleTransactionClick = (transaction: RiskyTransaction) => {
     setSelectedTransaction(transaction);
@@ -86,6 +86,17 @@ export default function RiskCompliance() {
 
   const handleMarkerClick = (region: string) => {
     setFilterRegion(region === filterRegion ? null : region);
+  };
+
+  const handleDecision = (transaction: RiskyTransaction, decision: "approved" | "rejected") => {
+    setTransactions((current) =>
+      current.map((tx) =>
+        tx.id === transaction.id ? { ...tx, decisionStatus: decision } : tx,
+      ),
+    );
+    setSelectedTransaction((current) =>
+      current?.id === transaction.id ? { ...current, decisionStatus: decision } : current,
+    );
   };
 
   return (
@@ -104,7 +115,7 @@ export default function RiskCompliance() {
           <GlobalMap hotspots={hotspots} onMarkerClick={handleMarkerClick} />
           
           <RiskyTransactionTable
-            transactions={allTransactions}
+            transactions={transactions}
             onTransactionClick={handleTransactionClick}
             selectedId={selectedTransaction?.id}
           />
@@ -113,6 +124,7 @@ export default function RiskCompliance() {
             transaction={selectedTransaction}
             open={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
+            onDecision={handleDecision}
           />
         </div>
       </div>

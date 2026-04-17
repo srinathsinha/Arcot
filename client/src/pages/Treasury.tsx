@@ -3,26 +3,41 @@ import PortfolioMetrics, { type Metrics } from "@/components/PortfolioMetrics";
 import RebalancingFeed, { type RebalanceOperation } from "@/components/RebalancingFeed";
 import RecentTransactionsTable, { type ApprovedTransaction } from "@/components/RecentTransactionsTable";
 import PortfolioGuardrailAlert from "@/components/PortfolioGuardrailAlert";
+import { useEffect, useState } from "react";
 
 export default function Treasury() {
+  const [approvedTransaction, setApprovedTransaction] = useState<ApprovedTransaction | null>(null);
+  const [swapExecuted, setSwapExecuted] = useState(false);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem("arcot-approved-transaction");
+    if (!stored) return;
+
+    try {
+      const parsed = JSON.parse(stored) as ApprovedTransaction;
+      setApprovedTransaction(parsed);
+    } catch {
+      sessionStorage.removeItem("arcot-approved-transaction");
+    }
+  }, []);
+
   const metrics: Metrics = {
     totalValue: 2450000,
-    driftPercentage: 8.5, // High drift to trigger guardrail alert
-    lastRebalance: "15m ago",
-    activeOperations: 2
+    driftPercentage: swapExecuted ? 1.0 : 6.0,
+    lastRebalance: swapExecuted ? "Just now" : "15m ago",
+    activeOperations: swapExecuted ? 1 : 2
   };
 
-  // Guardrail alert triggers when drift exceeds 5%
-  const guardrailRecommendation = metrics.driftPercentage > 5.0 ? {
-    fromToken: "ETH",
-    fromAmount: 15,
-    toToken: "USDC",
-    toAmount: 50000,
+  const guardrailRecommendation = {
+    fromToken: "USDC",
+    fromAmount: 5000,
+    toToken: "ETH",
+    toAmount: 1.5,
     exchange: "Hyperliquid",
-    reason: "Coinbase Commerce portfolio drift exceeded 5% threshold. ETH allocation is 8.5% above target.",
-    currentDrift: 8.5,
-    targetDrift: 2.0,
-  } : null;
+    reason: "The latest approved USDC inflow pushed Coinbase Commerce above the 40% USDC guardrail. Arcot recommends swapping 5,000 USDC to ETH on Hyperliquid.",
+    currentDrift: 46,
+    targetDrift: 39,
+  };
 
   const portfolios: EntityPortfolio[] = [
     {
@@ -30,7 +45,7 @@ export default function Treasury() {
       name: "Coinbase Commerce",
       tokens: [
         { symbol: "ETH", amount: 50, currentPercentage: 45, targetPercentage: 40, icon: "◆" },
-        { symbol: "USDC", amount: 100000, currentPercentage: 40, targetPercentage: 45, icon: "💵" },
+        { symbol: "USDC", amount: 108200, currentPercentage: swapExecuted ? 39 : 46, targetPercentage: 40, icon: "💵" },
         { symbol: "BTC", amount: 2, currentPercentage: 15, targetPercentage: 15, icon: "₿" }
       ]
     },
@@ -55,6 +70,14 @@ export default function Treasury() {
   ];
 
   const operations: RebalanceOperation[] = [
+    ...(swapExecuted ? [{
+      id: "approved-swap",
+      fromToken: { symbol: "USDC", icon: "💵", amount: 5000 },
+      toToken: { symbol: "ETH", icon: "◆", amount: 1.5 },
+      price: 3333,
+      timestamp: "Just now",
+      status: "completed" as const
+    }] : []),
     {
       id: "1",
       fromToken: { symbol: "USDC", icon: "💵", amount: 3000 },
@@ -90,6 +113,18 @@ export default function Treasury() {
   ];
 
   const recentTransactions: ApprovedTransaction[] = [
+    ...(swapExecuted ? [{
+      id: "swap-9821",
+      numericId: 9821,
+      token: "USDC → ETH",
+      amount: 5000,
+      from: "Arcot Treasury Wallet",
+      to: "Hyperliquid",
+      timestamp: "Just now",
+      approvedBy: "Arcot Treasury Agent",
+      status: "executed" as const
+    }] : []),
+    ...(approvedTransaction ? [approvedTransaction] : []),
     {
       id: "tx-101",
       numericId: 101,
@@ -150,7 +185,7 @@ export default function Treasury() {
 
         <div className="space-y-6">
           <PortfolioMetrics metrics={metrics} />
-          <PortfolioGuardrailAlert recommendation={guardrailRecommendation} />
+          <PortfolioGuardrailAlert recommendation={guardrailRecommendation} onSwapComplete={() => setSwapExecuted(true)} />
           <PortfolioView portfolios={portfolios} />
           <div className="grid lg:grid-cols-2 gap-6">
             <RebalancingFeed operations={operations} />

@@ -7,7 +7,9 @@ export default function RiskyTransactionTableExample() {
   const mockTransactions = [
     {
       id: "1",
+      numericId: 9821,
       token: "USDC",
+      amount: 8200,
       from: "0xa1b2c3d4e5f6",
       to: "0x9876543210ab",
       timestamp: "2m ago",
@@ -17,7 +19,9 @@ export default function RiskyTransactionTableExample() {
     },
     {
       id: "2",
+      numericId: 9822,
       token: "ETH",
+      amount: 12.5,
       from: "0xabcdef123456",
       to: "0x654321fedcba",
       timestamp: "5m ago",
@@ -27,7 +31,9 @@ export default function RiskyTransactionTableExample() {
     },
     {
       id: "3",
+      numericId: 9823,
       token: "BTC",
+      amount: 0.85,
       from: "0x1234567890ab",
       to: "0xabcdef012345",
       timestamp: "8m ago",
