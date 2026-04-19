@@ -38,60 +38,54 @@ export default function Home() {
                 </Button>
               </div>
             </div>
-            <div className="rounded-lg border border-card-border bg-card p-5 shadow-sm" data-testid="hero-flow">
-              <div className="flex items-center justify-between gap-3 border-b border-card-border pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-md bg-red-50 dark:bg-red-950/20 flex items-center justify-center">
-                    <Activity className="w-5 h-5 text-red-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">8,200 USDC inflow</p>
-                    <p className="text-xs text-muted-foreground">New wallet, risky geography, darknet signal</p>
-                  </div>
-                </div>
-                <Badge variant="destructive" className="shrink-0">AML Flag</Badge>
+            <div className="rounded-lg border border-card-border bg-card shadow-sm overflow-hidden" data-testid="hero-flow">
+              <div className="bg-muted/50 px-5 py-4 border-b border-card-border">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Demo Walkthrough</p>
+                <h2 className="text-xl font-semibold mt-1">Start with one flagged inflow. End with a treasury action.</h2>
               </div>
 
-              <div className="py-5">
-                <div className="rounded-md bg-primary text-primary-foreground p-4">
-                  <p className="text-sm font-semibold">Arcot Compliance Agent</p>
-                  <p className="text-xs opacity-90 mt-1">Checks both wallets, pays tools, records every API call.</p>
-                </div>
-              </div>
-
-              <div className="grid gap-3">
-                <div className="flex items-start gap-3 rounded-md border border-card-border p-3">
-                  <DollarSign className="w-5 h-5 text-primary mt-0.5" />
+              <div className="p-5 space-y-5">
+                <div className="flex gap-4">
+                  <div className="h-8 w-8 rounded-md bg-red-600 text-white flex items-center justify-center text-sm font-semibold shrink-0">1</div>
                   <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold">Pays ChainGuard Compliance</p>
-                      <Badge variant="outline" className="text-[10px]">HTTP 402 + X-PAYMENT</Badge>
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <p className="font-semibold">Monitor flags 8,200 USDC</p>
+                      <Badge variant="destructive">AML Flag</Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">0.005 USDC total spend across sender and receiver checks.</p>
+                    <p className="text-sm text-muted-foreground">A new wallet sends funds from a risky geography with a darknet signal.</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 rounded-md border border-card-border p-3">
-                  <SearchCheck className="w-5 h-5 text-primary mt-0.5" />
+                <div className="flex gap-4">
+                  <div className="h-8 w-8 rounded-md bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold shrink-0">2</div>
                   <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold">Returns risk verdict</p>
-                      <Badge variant="outline" className="text-[10px]">Locus / x402 Bazaar</Badge>
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <p className="font-semibold">Arcot pays for deeper verification</p>
+                      <Badge variant="outline">HTTP 402</Badge>
+                      <Badge variant="outline">X-PAYMENT</Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">Receiver links to Silk Road 2.0 cluster with 87/100 risk score.</p>
+                    <p className="text-sm text-muted-foreground">The agent pays ChainGuard 0.005 USDC, retries the request, and stores the full API trace.</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 rounded-md border border-card-border p-3">
-                  <Wallet className="w-5 h-5 text-primary mt-0.5" />
+                <div className="flex gap-4">
+                  <div className="h-8 w-8 rounded-md bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold shrink-0">3</div>
                   <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold">Hands off to Treasury</p>
-                      <Badge variant="outline" className="text-[10px]">CDP Agent Wallet</Badge>
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <p className="font-semibold">Treasury reviews the impact</p>
+                      <Badge variant="outline">Hyperliquid</Badge>
+                      <Badge variant="outline">CDP Wallet</Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">Approved inflows trigger guardrails and a Hyperliquid rebalance review.</p>
+                    <p className="text-sm text-muted-foreground">An approved inflow breaches the USDC guardrail and opens a 5,000 USDC to ETH rebalance.</p>
                   </div>
                 </div>
+
+                <Link href="/monitor">
+                  <Button className="w-full mt-2" data-testid="button-start-walkthrough">
+                    Open the Monitor Demo
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
