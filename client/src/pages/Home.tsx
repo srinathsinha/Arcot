@@ -38,39 +38,62 @@ export default function Home() {
                 </Button>
               </div>
             </div>
-            <Card className="p-6">
-              <div className="space-y-5">
+            <div className="rounded-lg border border-card-border bg-card p-5 shadow-sm" data-testid="hero-flow">
+              <div className="flex items-center justify-between gap-3 border-b border-card-border pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center">
-                    <Activity className="w-5 h-5 text-primary" />
+                  <div className="h-10 w-10 rounded-md bg-red-50 dark:bg-red-950/20 flex items-center justify-center">
+                    <Activity className="w-5 h-5 text-red-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold">Transaction stream</p>
-                    <p className="text-xs text-muted-foreground">8,200 USDC high-risk inflow</p>
+                    <p className="text-sm font-semibold">8,200 USDC inflow</p>
+                    <p className="text-xs text-muted-foreground">New wallet, risky geography, darknet signal</p>
                   </div>
                 </div>
-                <div className="ml-5 border-l pl-5 space-y-4">
-                  <div className="rounded-md border p-3">
-                    <p className="text-sm font-semibold">Arcot Agent Node</p>
-                    <p className="text-xs text-muted-foreground">Routes checks, pays tools, records audit trail</p>
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <div className="rounded-md border p-3">
-                      <Badge variant="outline" className="mb-2 text-[10px]">x402 Payment</Badge>
-                      <p className="text-sm font-medium">Compliance Tool A</p>
+                <Badge variant="destructive" className="shrink-0">AML Flag</Badge>
+              </div>
+
+              <div className="py-5">
+                <div className="rounded-md bg-primary text-primary-foreground p-4">
+                  <p className="text-sm font-semibold">Arcot Compliance Agent</p>
+                  <p className="text-xs opacity-90 mt-1">Checks both wallets, pays tools, records every API call.</p>
+                </div>
+              </div>
+
+              <div className="grid gap-3">
+                <div className="flex items-start gap-3 rounded-md border border-card-border p-3">
+                  <DollarSign className="w-5 h-5 text-primary mt-0.5" />
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-semibold">Pays ChainGuard Compliance</p>
+                      <Badge variant="outline" className="text-[10px]">HTTP 402 + X-PAYMENT</Badge>
                     </div>
-                    <div className="rounded-md border p-3">
-                      <Badge variant="outline" className="mb-2 text-[10px]">Locus / Bazaar</Badge>
-                      <p className="text-sm font-medium">Intel Tool B</p>
-                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">0.005 USDC total spend across sender and receiver checks.</p>
                   </div>
-                  <div className="rounded-md border p-3">
-                    <Badge variant="outline" className="mb-2 text-[10px]">CDP Agent Wallet</Badge>
-                    <p className="text-sm font-medium">Treasury execution trail</p>
+                </div>
+
+                <div className="flex items-start gap-3 rounded-md border border-card-border p-3">
+                  <SearchCheck className="w-5 h-5 text-primary mt-0.5" />
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-semibold">Returns risk verdict</p>
+                      <Badge variant="outline" className="text-[10px]">Locus / x402 Bazaar</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Receiver links to Silk Road 2.0 cluster with 87/100 risk score.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 rounded-md border border-card-border p-3">
+                  <Wallet className="w-5 h-5 text-primary mt-0.5" />
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-semibold">Hands off to Treasury</p>
+                      <Badge variant="outline" className="text-[10px]">CDP Agent Wallet</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Approved inflows trigger guardrails and a Hyperliquid rebalance review.</p>
                   </div>
                 </div>
               </div>
-            </Card>
+            </div>
           </div>
         </div>
       </div>

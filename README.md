@@ -1,6 +1,6 @@
 # Arcot - Autonomous Risk & Compliance Officer
 
-**Live Demo**: Deploy this repo to Render Free Web Service for an `*.onrender.com` demo URL.
+**Live Demo**: [https://arcot-demo.onrender.com/](https://arcot-demo.onrender.com/)
 
 ## Overview
 
